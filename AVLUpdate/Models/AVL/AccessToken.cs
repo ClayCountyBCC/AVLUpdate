@@ -40,7 +40,7 @@ namespace AVLUpdate.Models.AVL
 
     public static AccessToken Authenticate()
     {
-
+      return new AccessToken();
     }
 
   }
