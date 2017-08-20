@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AVLUpdate.Models.AVL
+namespace AVLUpdate.Models.AirVantange
 {
-  class gateway
+  public class gateway
   {
     public string uid { get; set; }
     public string imei { get; set; }

@@ -35,8 +35,15 @@
     <Reference Include="Dapper, Version=1.50.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dapper.1.50.2\lib\net451\Dapper.dll</HintPath>
     </Reference>
+    <Reference Include="GeoAPI, Version=1.7.3.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeoAPI.1.7.3\lib\net45-client\GeoAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="ProjNet, Version=1.3.0.3, Culture=neutral, PublicKeyToken=a1f5bdcd9c6f5740, processorArchitecture=MSIL">
+      <HintPath>..\packages\ProjNET4GeoAPI.1.3.0.4\lib\net45-client\ProjNet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -49,18 +56,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\AVL\AccessToken.cs" />
-    <Compile Include="Models\AVL\AVLControl.cs" />
-    <Compile Include="Models\AVL\AVLData.cs" />
-    <Compile Include="Models\AVL\gateway.cs" />
-    <Compile Include="Models\AVL\subscription.cs" />
+    <Compile Include="Models\AirVantage\AccessToken.cs" />
+    <Compile Include="Models\AirVantage\AirVantageControl.cs" />
+    <Compile Include="Models\AirVantage\AirVantageData.cs" />
+    <Compile Include="Models\AirVantage\gateway.cs" />
+    <Compile Include="Models\AirVantage\subscription.cs" />
     <Compile Include="Models\ErrorLog.cs" />
+    <Compile Include="Models\GIS\Point.cs" />
+    <Compile Include="Models\GIS\UnitLocation.cs" />
+    <Compile Include="Models\Tracking\Unit.cs" />
+    <Compile Include="Models\Tracking\UnitTracking.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="AUConnectionStrings.config" />
+    <None Include="AUConnectionStrings.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

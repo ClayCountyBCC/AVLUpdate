@@ -5,14 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace AVLUpdate.Models.AVL
+namespace AVLUpdate.Models.AirVantange
 {
-  class subscription
+  public class subscription
   {
     public string state { get; set; }
     public string uid { get; set; }
     public string identifier { get; set; }
-    public string mobileNumber { get; set; }
+    public long? mobileNumber { get; set; }
     public string networkIdentifier { get; set; }
     public string eid { get; set; }
     [JsonProperty("operator")]
