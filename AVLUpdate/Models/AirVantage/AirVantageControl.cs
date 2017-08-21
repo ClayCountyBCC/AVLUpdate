@@ -10,6 +10,13 @@ namespace AVLUpdate.Models.AirVantange
   {
     private AccessToken Token { get; set; }
 
+    // The airvantage data will tell us the phone number
+    // and IMEI of the units.  The phone number is tied
+    // to the sim card, the IMEI is tied to the AVL
+    // hardware.
+    // Really, it only matters if an AVL breaks and 
+    // has to be replaced.
+
     public AirVantageControl()
     {
       Token = AccessToken.Authenticate();
@@ -24,6 +31,7 @@ namespace AVLUpdate.Models.AirVantange
       }
       return AirVantageData.Get(Token).ToList();
     }
+
 
 
   }

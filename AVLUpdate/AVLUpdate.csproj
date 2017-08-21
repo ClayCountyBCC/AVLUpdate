@@ -62,6 +62,7 @@
     <Compile Include="Models\AirVantage\gateway.cs" />
     <Compile Include="Models\AirVantage\subscription.cs" />
     <Compile Include="Models\ErrorLog.cs" />
+    <Compile Include="Models\FleetComplete\FleetCompleteControl.cs" />
     <Compile Include="Models\GIS\Point.cs" />
     <Compile Include="Models\GIS\UnitLocation.cs" />
     <Compile Include="Models\Tracking\Unit.cs" />
@@ -79,5 +80,6 @@
   <ItemGroup>
     <Content Include=".gitignore" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

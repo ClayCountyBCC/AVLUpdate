@@ -25,6 +25,9 @@ namespace AVLUpdate.Models.AirVantange
 
     public static List<AirVantageData>Get(AccessToken token)
     {
+      // let's catch an error if we fail at getting a token.
+      if (token == null) return null; 
+
       string url = $"https://na.airvantage.net/api/v1/systems?fields=name,labels,uid,gateway,subscriptions&access_token={token.access_token}";
       var wr = HttpWebRequest.Create(url);
       wr.ContentType = "application/json";

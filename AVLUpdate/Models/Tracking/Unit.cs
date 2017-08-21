@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AVLUpdate.Models.AirVantange;
 
 namespace AVLUpdate.Models.Tracking
 {
@@ -14,10 +15,35 @@ namespace AVLUpdate.Models.Tracking
     public string unitcode { get; set; }
     public string source { get; set; }
     public long imei { get; set; }
-    public long phonenumber { get; set; }
+    public long phonenumber { get; set; } = 0;
+
     public Unit()
     {
+    }
 
+    public Unit(AirVantageData avd)
+    {
+      // here we're going to convert the AirVantageData class
+      // into a Unit class, which we'll compare against the
+      // data in the valid_unit_list table.
+      if(avd.labels.Count() == 0)
+      {
+        unitcode = avd.name;
+      }
+      else
+      {
+        unitcode = avd.labels.First();
+      }
+      imei = long.Parse(avd.gateway.imei);
+
+      if(avd.subscriptions.Count > 0)
+      {
+        var pn = avd.subscriptions.First().mobileNumber;
+        if (pn.HasValue)
+        {
+          phonenumber = pn.Value;
+        }
+      }
     }
 
     public static List<Unit> Get()
@@ -75,7 +101,7 @@ namespace AVLUpdate.Models.Tracking
         SET 
           imei=@imei, 
           phonenumber=@phonenumber
-        WHERE unitcode=@unitcode AND source=@source";
+        WHERE unitcode=@unitcode";
       try
       {
         using (IDbConnection db = new SqlConnection(Program.Get_ConnStr(Program.CS_Type.Tracking)))

@@ -13,23 +13,21 @@ namespace AVLUpdate.Models.GIS
     public string deviceType { get; set; }
     public int direction { get; set; }
     public DateTime timestampUTC { get; set; }
-    public int velocityKM { get; set; }
+    public int velocityKM { get; set; } = 0;
+    public int velocityMPH { get
+      {
+        if (velocityKM == 0) return 0;
+        return (int)(velocityKM * 0.621371);
+      } }
     public string ipAddress { get; set; }
-    public SqlGeometry shape { get; set; } 
+    public decimal XCoord { get; set; } = 0;
+    public decimal YCoord { get; set; } = 0;
     public int satelliteCount { get; set; }
     public Point Location
     {
       get
       {
-        return new Point((double)shape.STX, (double)shape.STY);
-        //if (shape == null)
-        //{
-        //  return new Point();
-        //}
-        //else
-        //{
-          
-        //}
+        return new Point((double)XCoord, (double)YCoord);
       }
     }
 
@@ -49,7 +47,8 @@ namespace AVLUpdate.Models.GIS
           AS1.Direction direction, 
           AS1.VelocityKM velocityKM, 
           AS1.GPSSatellites satelliteCount,
-          AS1.Shape shape, 
+          AS1.Shape.STX XCoord,
+          AS1.Shape.STY YCoord,
           AS1.IpAddress ipAddress
         FROM AVL_PS_CURRENT AS1 
         INNER JOIN 

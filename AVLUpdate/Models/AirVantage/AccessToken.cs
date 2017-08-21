@@ -43,10 +43,10 @@ namespace AVLUpdate.Models.AirVantange
 
     public static AccessToken Authenticate()
     {
-      string user = Program.Get_ConnStr(Program.CS_Type.User);
-      string password = Program.Get_ConnStr(Program.CS_Type.Password);
-      string clientid = Program.Get_ConnStr(Program.CS_Type.client_id);
-      string clientsecret = Program.Get_ConnStr(Program.CS_Type.client_secret);
+      string user = Program.Get_ConnStr(Program.CS_Type.AV_User);
+      string password = Program.Get_ConnStr(Program.CS_Type.AV_Password);
+      string clientid = Program.Get_ConnStr(Program.CS_Type.AV_Client_Id);
+      string clientsecret = Program.Get_ConnStr(Program.CS_Type.AV_Client_Secret);
       string url = $"https://na.airvantage.net/api/oauth/token?grant_type=password&username={user}&password={password}&client_id={clientid}&client_secret={clientsecret}";
       var wr = HttpWebRequest.Create(url);
       string json = "";

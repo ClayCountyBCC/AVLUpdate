@@ -11,6 +11,7 @@ using AVLUpdate.Models;
 using AVLUpdate.Models.AirVantange;
 using AVLUpdate.Models.GIS;
 using AVLUpdate.Models.Tracking;
+using System.Threading;
 
 namespace AVLUpdate
 {
@@ -28,17 +29,26 @@ namespace AVLUpdate
       }
       var avl = new AirVantageControl();
 
-      while (DateTime.Now < endTime)
+      while (DateTime.Now < endTime) // we want this program to run from 6 AM to 5:55 AM
       {
         try
         {
-          var avd = avl.Get();
-          var nophone = (from a in avd
-                         where !a.subscriptions.First().mobileNumber.HasValue
-                         select a).ToList();
-          var unitLocs = UnitLocation.Get();
-          var i = avd.Count();
+          // Goals
+          // update the data from Airvantage every 5 minutes
+          // update the data from GIS every 10 seconds
+          // update the data from FleetComplete every 30 seconds?
 
+
+
+
+          //var avd = avl.Get();
+          //var nophone = (from a in avd
+          //               where !a.subscriptions.First().mobileNumber.HasValue
+          //               select a).ToList();
+          var unitLocs = UnitLocation.Get();
+          var i = 0;
+
+          Thread.Sleep(10000);
         }catch(Exception ex)
         {
           new ErrorLog(ex);
@@ -117,10 +127,11 @@ namespace AVLUpdate
       GIS = 1,
       Tracking = 2,
       LOG = 4,
-      User = 8,
-      Password = 16,
-      client_id=32,
-      client_secret=64
+      AV_User = 8,
+      AV_Password = 16,
+      AV_Client_Id=32,
+      AV_Client_Secret=64,
+      FC
     }
 
     public static string Get_ConnStr(CS_Type cs)
