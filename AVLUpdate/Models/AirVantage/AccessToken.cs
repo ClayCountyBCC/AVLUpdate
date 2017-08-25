@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.IO;
 using Newtonsoft.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,24 +55,6 @@ namespace AVLUpdate.Models.AirVantange
       {
         return new AccessToken();
       }
-      
-      //var wr = HttpWebRequest.Create(url);
-      //string json = "";
-      //try
-      //{
-      //  var response = wr.GetResponse();
-      //  using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-      //  {
-      //    json = sr.ReadToEnd();
-      //    return JsonConvert.DeserializeObject<AccessToken>(json);
-      //  }
-      //}
-      //catch (Exception ex)
-      //{
-      //  new ErrorLog(ex);
-      //  return new AccessToken();
-      //}
-
     }
 
   }

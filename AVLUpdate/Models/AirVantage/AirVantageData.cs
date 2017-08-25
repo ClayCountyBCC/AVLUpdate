@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using AVLUpdate.Models.Tracking;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,24 +37,13 @@ namespace AVLUpdate.Models.AirVantange
       {
         return null;
       }
-      
-      //var wr = HttpWebRequest.Create(url);
-      //wr.ContentType = "application/json";
-      //string json = "";
-      //try
-      //{
-      //  var response = wr.GetResponse();
-      //  using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-      //  {
-      //    json = sr.ReadToEnd();
-      //    return JObject.Parse(json).SelectToken("items").ToObject<List<AirVantageData>>();
-      //  }
-      //}
-      //catch (Exception ex)
-      //{
-      //  new ErrorLog(ex, json);
-      //  return null;
-      //}
+    }
+
+    public void UpdateUnitTracking()
+    {
+      // This function will take whatever is returned for this object and 
+      // update our UnitTracking table in the Tracking database.
+      UnitTracking.UpdateAirVantageData(this);
     }
 
   }

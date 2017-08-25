@@ -32,12 +32,13 @@ namespace AVLUpdate.Models.Tracking
 
     }
 
-    public UnitTracking(AirVantageData avd)
+    public static void UpdateAirVantageData(AirVantageData avd)
     {
+      var ut = new UnitTracking();
       if(avd.labels.Count() == 1)
       {
         // if there are not exactly 1 label, we should error out
-        unitcode = avd.labels.First().Trim();
+        ut.unitcode = avd.labels.First().Trim();
       }
       else
       {
@@ -46,16 +47,16 @@ namespace AVLUpdate.Models.Tracking
       if(avd.subscriptions.Count() > 0)
       {
         var s = avd.subscriptions.First();
-        if (s.mobileNumber.HasValue && s.mobileNumber.Value != phoneNumber)
+        if (s.mobileNumber.HasValue && s.mobileNumber.Value != ut.phoneNumber)
         {
-          phoneNumber = s.mobileNumber.Value;
+          ut.phoneNumber = s.mobileNumber.Value;
         }
       }
-      if (avd.gateway.imei.HasValue && avd.gateway.imei.Value != imei)
+      if (avd.gateway.imei.HasValue && avd.gateway.imei.Value != ut.imei)
       {
-        imei = avd.gateway.imei.Value;
+        ut.imei = avd.gateway.imei.Value;
       }
-      Insert();
+      ut.Merge();
     }
 
     public static List<UnitTracking> Get()
@@ -95,86 +96,58 @@ namespace AVLUpdate.Models.Tracking
       }
     }
 
-    public void Update()
-    {
-      string query = @"
-        UPDATE unit_tracking_data
-        SET 
-          unit_using=@unitUsing,
-          date_updated=@dateUpdated,
-          date_last_communicated=@dateLastCommunicated,
-          longitude=@longitude,
-          latitude=@latitude,
-          direction=@direction,
-          velocity_mph=@velocityMPH,
-          gps_satellite_count=@gpsSatelliteCount,
-          ip_address=@ipAddress,
-          imei=@imei,
-          phone_number=@phoneNumber
-        WHERE unitcode=@unitcode";
-      try
-      {
-        using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.Tracking)))
-        {
-          db.Execute(query, this);
-        }
-      }
-      catch (Exception ex)
-      {
-        new ErrorLog(ex, query);
-      }
-    }
-
-    public void Update(AirVantageData avd)
-    {
-      bool changed = false;
-      if(avd.gateway.imei.HasValue && avd.gateway.imei.Value != imei)
-      {
-        imei = avd.gateway.imei.Value;
-        changed = true;
-      }
-      if(avd.subscriptions.Count() > 0)
-      {
-        var s = avd.subscriptions.First();
-        if(s.mobileNumber.HasValue && s.mobileNumber.Value != phoneNumber)
-        {
-          phoneNumber = s.mobileNumber.Value;
-          changed = true;
-        }
-      }
-      if (changed)
-      {
-        Update();
-      }
-    }
-
-    public void Insert()
+    public void Merge()
     {
       if (unitcode.Length == 0) return;
       string query = @"
-        INSERT INTO unit_tracking_data
-          (unitcode
-          ,longitude
-          ,latitude
-          ,direction
-          ,velocity_mph
-          ,ip_address
-          ,gps_satellite_count
-          ,imei
-          ,phone_number
-          ,date_last_communicated)
-        VALUES (
-          @unitCode,
-          @longitude,
-          @latitude,
-          @direction,
-          @velocityMPH,
-          @ipAddress,
-          @gpsSatelliteCount,
-          @imei,
-          @phoneNumber,
-          @dateLastCommunicated
-        )";
+        SET NOCOUNT, XACT_ABORT ON;
+
+        MERGE unit_tracking_data WITH (HOLDLOCK) AS UTD
+
+        USING (SELECT @unitCode unitCode) AS newUnit
+              ON UTD.unitcode = newUnit.unitCode
+
+        WHEN MATCHED THEN
+          
+          UPDATE 
+          SET 
+            using_unit=@usingUnit,
+            date_updated=@dateUpdated,
+            date_last_communicated=@dateLastCommunicated,
+            longitude=@longitude,
+            latitude=@latitude,
+            direction=@direction,
+            velocity_mph=@velocityMPH,
+            gps_satellite_count=@gpsSatelliteCount,
+            ip_address=@ipAddress,
+            imei=@imei,
+            phone_number=@phoneNumber
+
+        WHEN NOT MATCHED THEN
+
+          INSERT 
+            (unitcode
+            ,longitude
+            ,latitude
+            ,direction
+            ,velocity_mph
+            ,ip_address
+            ,gps_satellite_count
+            ,imei
+            ,phone_number
+            ,date_last_communicated)
+          VALUES (
+            @unitCode,
+            @longitude,
+            @latitude,
+            @direction,
+            @velocityMPH,
+            @ipAddress,
+            @gpsSatelliteCount,
+            @imei,
+            @phoneNumber,
+            @dateLastCommunicated
+          );";
       try
       {
         using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.Tracking)))

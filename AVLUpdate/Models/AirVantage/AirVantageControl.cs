@@ -31,7 +31,7 @@ namespace AVLUpdate.Models.AirVantange
       Token = AccessToken.Authenticate();      
     }
 
-    private List<AirVantageData> Get()
+    private void Update()
     {
       // we only query this again if the IsExpired field is true, otherwise
       // we return an empty list.
@@ -40,14 +40,17 @@ namespace AVLUpdate.Models.AirVantange
         if (Token.isExpired)
         {
           Token = AccessToken.Authenticate();
-          if (Token.isExpired) return null;
+          if (Token.isExpired) return;
         }
 
         var avd = AirVantageData.Get(Token).ToList();
         DataTimeOut = DateTime.Now.AddMinutes(MinutesToWait);
-        return avd;
-      }
-      return new List<AirVantageData>();
+        foreach (AirVantageData a in avd)
+        {
+          a.UpdateUnitTracking();
+        }
+        return;
+      }    
     }
 
   }
