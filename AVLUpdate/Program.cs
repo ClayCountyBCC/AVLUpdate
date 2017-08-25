@@ -12,6 +12,8 @@ using AVLUpdate.Models.AirVantange;
 using AVLUpdate.Models.GIS;
 using AVLUpdate.Models.Tracking;
 using System.Threading;
+using System.Net;
+using System.IO;
 
 namespace AVLUpdate
 {
@@ -21,6 +23,7 @@ namespace AVLUpdate
 
     static void Main()
     {
+
       // Main loop here
       DateTime endTime = DateTime.Today.AddHours(5).AddMinutes(55);
       if (DateTime.Now.Hour > 5)
@@ -41,11 +44,14 @@ namespace AVLUpdate
 
 
 
-          //var avd = avl.Get();
+          //var avd = avl.Update();
           //var nophone = (from a in avd
           //               where !a.subscriptions.First().mobileNumber.HasValue
           //               select a).ToList();
-          var unitLocs = UnitLocation.Get();
+          //var labels = (from a in avd
+          //              where a.labels.Count() > 1 || a.labels.Count() == 0
+          //              select a).ToList();
+          //var unitLocs = UnitLocation.Get();
           var i = 0;
 
           Thread.Sleep(10000);
@@ -56,13 +62,41 @@ namespace AVLUpdate
       }
    }
 
+    public static string GetJSON(string url, WebHeaderCollection hc = null)
+    {
+      var wr = HttpWebRequest.Create(url);
+      wr.ContentType = "application/json";
+      if(hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
+      {
+        foreach (string key in hc.AllKeys)
+        {
+          wr.Headers.Add(key, hc[key]);
+        }        
+      }
+      string json = "";
+      try
+      {
+        var response = wr.GetResponse();
+        using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+        {
+          json = sr.ReadToEnd();
+          return json;
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, json);
+        return null;
+      }
+    }
+
     #region " Data Code "
 
     public static List<T> Get_Data<T>(string query, CS_Type cs)
     {
       try
       {
-        using (IDbConnection db = new SqlConnection(Get_ConnStr(cs)))
+        using (IDbConnection db = new SqlConnection(GetCS(cs)))
         {
           return (List<T>)db.Query<T>(query);
         }
@@ -78,7 +112,7 @@ namespace AVLUpdate
     {
       try
       {
-        using (IDbConnection db = new SqlConnection(Get_ConnStr(cs)))
+        using (IDbConnection db = new SqlConnection(GetCS(cs)))
         {
           return (List<T>)db.Query<T>(query, dbA);
         }
@@ -94,7 +128,7 @@ namespace AVLUpdate
     {
       try
       {
-        using (IDbConnection db = new SqlConnection(Get_ConnStr(cs)))
+        using (IDbConnection db = new SqlConnection(GetCS(cs)))
         {
           return db.Execute(query, dbA);
         }
@@ -110,7 +144,7 @@ namespace AVLUpdate
     {
       try
       {
-        using (IDbConnection db = new SqlConnection(Get_ConnStr(cs)))
+        using (IDbConnection db = new SqlConnection(GetCS(cs)))
         {
           return db.ExecuteScalar<int>(query, dbA);
         }
@@ -126,15 +160,17 @@ namespace AVLUpdate
     {
       GIS = 1,
       Tracking = 2,
-      LOG = 4,
-      AV_User = 8,
-      AV_Password = 16,
-      AV_Client_Id=32,
-      AV_Client_Secret=64,
-      FC
+      LOG = 3,
+      AV_User = 4,
+      AV_Password = 5,
+      AV_Client_Id = 6,
+      AV_Client_Secret = 7,
+      FC_User = 8,
+      FC_Password = 9,
+      FC_Client_Id = 10
     }
 
-    public static string Get_ConnStr(CS_Type cs)
+    public static string GetCS(CS_Type cs)
     {
       return ConfigurationManager.ConnectionStrings[cs.ToString()].ConnectionString;
     }

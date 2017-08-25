@@ -9,9 +9,9 @@ namespace AVLUpdate.Models.GIS
 {
   public class UnitLocation
   {
-    public string deviceId { get; set; }
-    public string deviceType { get; set; }
-    public int direction { get; set; }
+    public string deviceId { get; set; } = "";
+    public string deviceType { get; set; } = "";
+    public int direction { get; set; } = 0;
     public DateTime timestampUTC { get; set; }
     public int velocityKM { get; set; } = 0;
     public int velocityMPH { get
@@ -19,10 +19,12 @@ namespace AVLUpdate.Models.GIS
         if (velocityKM == 0) return 0;
         return (int)(velocityKM * 0.621371);
       } }
-    public string ipAddress { get; set; }
+    public string ipAddress { get; set; } = "";
     public decimal XCoord { get; set; } = 0;
     public decimal YCoord { get; set; } = 0;
-    public int satelliteCount { get; set; }
+    public int satelliteCount { get; set; } = 0;
+    public long imei { get; set; } = 0;
+    public long phonenumber { get; set; } = 0;
     public Point Location
     {
       get

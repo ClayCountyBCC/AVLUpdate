@@ -11,6 +11,21 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -62,24 +77,45 @@
     <Compile Include="Models\AirVantage\gateway.cs" />
     <Compile Include="Models\AirVantage\subscription.cs" />
     <Compile Include="Models\ErrorLog.cs" />
+    <Compile Include="Models\FleetComplete\AccessToken.cs" />
+    <Compile Include="Models\FleetComplete\Advanced.cs" />
+    <Compile Include="Models\FleetComplete\Asset.cs" />
+    <Compile Include="Models\FleetComplete\Error.cs" />
     <Compile Include="Models\FleetComplete\FleetCompleteControl.cs" />
+    <Compile Include="Models\FleetComplete\Field.cs" />
+    <Compile Include="Models\FleetComplete\FleetCompleteData.cs" />
+    <Compile Include="Models\FleetComplete\Position.cs" />
+    <Compile Include="Models\FleetComplete\Satellite.cs" />
     <Compile Include="Models\GIS\Point.cs" />
     <Compile Include="Models\GIS\UnitLocation.cs" />
-    <Compile Include="Models\Tracking\Unit.cs" />
     <Compile Include="Models\Tracking\UnitTracking.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="AUConnectionStrings.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.6.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -43,27 +43,37 @@ namespace AVLUpdate.Models.AirVantange
 
     public static AccessToken Authenticate()
     {
-      string user = Program.Get_ConnStr(Program.CS_Type.AV_User);
-      string password = Program.Get_ConnStr(Program.CS_Type.AV_Password);
-      string clientid = Program.Get_ConnStr(Program.CS_Type.AV_Client_Id);
-      string clientsecret = Program.Get_ConnStr(Program.CS_Type.AV_Client_Secret);
+      string user = Program.GetCS(Program.CS_Type.AV_User);
+      string password = Program.GetCS(Program.CS_Type.AV_Password);
+      string clientid = Program.GetCS(Program.CS_Type.AV_Client_Id);
+      string clientsecret = Program.GetCS(Program.CS_Type.AV_Client_Secret);
       string url = $"https://na.airvantage.net/api/oauth/token?grant_type=password&username={user}&password={password}&client_id={clientid}&client_secret={clientsecret}";
-      var wr = HttpWebRequest.Create(url);
-      string json = "";
-      try
+      string json = Program.GetJSON(url);
+      if(json != null)
       {
-        var response = wr.GetResponse();
-        using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-        {
-          json = sr.ReadToEnd();
-          return JsonConvert.DeserializeObject<AccessToken>(json);
-        }
+        return JsonConvert.DeserializeObject<AccessToken>(json);
       }
-      catch (Exception ex)
+      else
       {
-        new ErrorLog(ex);
         return new AccessToken();
       }
+      
+      //var wr = HttpWebRequest.Create(url);
+      //string json = "";
+      //try
+      //{
+      //  var response = wr.GetResponse();
+      //  using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+      //  {
+      //    json = sr.ReadToEnd();
+      //    return JsonConvert.DeserializeObject<AccessToken>(json);
+      //  }
+      //}
+      //catch (Exception ex)
+      //{
+      //  new ErrorLog(ex);
+      //  return new AccessToken();
+      //}
 
     }
 

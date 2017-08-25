@@ -51,7 +51,7 @@ namespace AVLUpdate.Models
           VALUES (@applicationName, @errorText, @errorMessage,
             @errorStacktrace, @errorSource, @query);";
 
-      using (IDbConnection db = new SqlConnection(Program.Get_ConnStr(Program.CS_Type.LOG)))
+      using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.LOG)))
       {
         db.Execute(sql, this);
       }
@@ -72,7 +72,7 @@ namespace AVLUpdate.Models
         dbArgs.Add("@Body", body);
 
 
-        using (IDbConnection db = new SqlConnection(Program.Get_ConnStr(Program.CS_Type.LOG)))
+        using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.LOG)))
         {
           db.Execute(sql, dbArgs);
         }
