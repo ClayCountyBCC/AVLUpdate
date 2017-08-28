@@ -9,10 +9,43 @@ namespace AVLUpdate.Models.GIS
 {
   public class UnitLocation
   {
-    public string deviceId { get; set; } = "";
+    public enum TypeIdentifier : int
+    {
+      unknown = 0,
+      phoneNumber = 1,
+      imei = 2
+    }
+
+    public long deviceId { get; set; } = 0;
     public string deviceType { get; set; } = "";
+    public TypeIdentifier deviceTypeIdentifier
+    {
+      get
+      {
+        switch (deviceType)
+        {
+          case "ESN/IMSI":
+            imei = deviceId;
+            return TypeIdentifier.imei;
+
+          case "Phone Number":
+            phoneNumber = deviceId;
+            return TypeIdentifier.phoneNumber;
+
+          default:
+            return TypeIdentifier.unknown;
+        }          
+      }
+    }
     public int direction { get; set; } = 0;
     public DateTime timestampUTC { get; set; }
+    public DateTime timestampLocal
+    {
+      get
+      {
+        return timestampUTC.ToLocalTime();
+      }
+    }
     public int velocityKM { get; set; } = 0;
     public int velocityMPH { get
       {
@@ -24,7 +57,7 @@ namespace AVLUpdate.Models.GIS
     public decimal YCoord { get; set; } = 0;
     public int satelliteCount { get; set; } = 0;
     public long imei { get; set; } = 0;
-    public long phonenumber { get; set; } = 0;
+    public long phoneNumber { get; set; } = 0;
     public Point Location
     {
       get
@@ -65,7 +98,10 @@ namespace AVLUpdate.Models.GIS
         WHERE 
           AS1.DeviceID IS NOT NULL 
         ORDER BY TimeStampUTC";
-      return Program.Get_Data<UnitLocation>(query, Program.CS_Type.GIS);
+      // only return those locations we know are valid.
+      return (from u in Program.Get_Data<UnitLocation>(query, Program.CS_Type.GIS)
+              where u.Location.IsValid && u.deviceId > 0
+              select u).ToList();
     }
 
   }

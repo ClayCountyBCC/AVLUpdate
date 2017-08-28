@@ -10,8 +10,8 @@ namespace AVLUpdate.Models.GIS
   {
     public double X { get; set; } = double.MinValue;
     public double Y { get; set; } = double.MinValue;
-    public double Latitude { get; set; } = double.MinValue;
-    public double Longitude { get; set; } = double.MinValue;
+    public decimal Latitude { get; set; } = decimal.MinValue;
+    public decimal Longitude { get; set; } = decimal.MinValue;
     public bool IsValid
     {
       get
@@ -42,8 +42,8 @@ namespace AVLUpdate.Models.GIS
       var trans = t.CreateFromCoordinateSystems(projsource, ctarget);
       double[] point = { X, Y };
       double[] convpoint = trans.MathTransform.Transform(point);
-      Longitude = convpoint[0];
-      Latitude = convpoint[1];
+      Longitude = (decimal)convpoint[0];
+      Latitude = (decimal)convpoint[1];
     }
 
   }

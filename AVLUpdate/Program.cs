@@ -40,7 +40,9 @@ namespace AVLUpdate
       {
         try
         {
-          utc.UpdateTrackingData(); // pull in the current state of the unit_tracking_data table          
+          // pull in the current state of the unit_tracking_data table 
+          // this will also update the most recent unitUsing data.
+          utc.UpdateTrackingData(); 
           
           utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
           
@@ -48,7 +50,7 @@ namespace AVLUpdate
 
           utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
 
-          utc.Save();
+          utc.Save(); // Save the data to SQL
 
           Thread.Sleep(10000); // this may not be needed if we await/async these calls.
         }catch(Exception ex)

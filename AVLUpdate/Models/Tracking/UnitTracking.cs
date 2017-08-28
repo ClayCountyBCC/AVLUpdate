@@ -25,6 +25,7 @@ namespace AVLUpdate.Models.Tracking
     public int velocityMPH { get; set; } = 0;
     public string ipAddress { get; set; } = "";
     public int gpsSatelliteCount { get; set; } = 0;
+    public string dataSource { get; set; }
     public long imei { get; set; } = 0;
     public long phoneNumber { get; set; } = 0;
     public string assetTag { get; set; } = "";
@@ -35,32 +36,13 @@ namespace AVLUpdate.Models.Tracking
     {
 
     }
-
-    public static void UpdateAirVantageData(AirVantageData avd)
+    public UnitTracking(string Unitcode, long Imei, long PhoneNumber, string Source)
     {
-      var ut = new UnitTracking();
-      if(avd.labels.Count() == 1)
-      {
-        // if there are not exactly 1 label, we should error out
-        ut.unitcode = avd.labels.First().Trim();
-      }
-      else
-      {
-        return;
-      }
-      if(avd.subscriptions.Count() > 0)
-      {
-        var s = avd.subscriptions.First();
-        if (s.mobileNumber.HasValue && s.mobileNumber.Value != ut.phoneNumber)
-        {
-          ut.phoneNumber = s.mobileNumber.Value;
-        }
-      }
-      if (avd.gateway.imei.HasValue && avd.gateway.imei.Value != ut.imei)
-      {
-        ut.imei = avd.gateway.imei.Value;
-      }
-      ut.Merge();
+      unitcode = Unitcode;
+      imei = Imei;
+      phoneNumber = PhoneNumber;
+      dataSource = Source;
+      isChanged = true;
     }
 
     public static List<UnitTracking> Get()
@@ -85,6 +67,7 @@ namespace AVLUpdate.Models.Tracking
           UTD.velocity_mph velocityMPH,
           UTD.ip_address ipAddress,
           UTD.gps_satellite_count gpsSatelliteCount,
+          UTD.data_souce dataSource,
           UTD.imei,
           UTD.phone_number phoneNumber,
           UTD.asset_tag assetTag,
@@ -167,26 +150,26 @@ namespace AVLUpdate.Models.Tracking
       }
     }
 
-    public static void UpdateUnitsUsing()
-    {
-      string query = @"
-        SET NOCOUNT ON;
-        UPDATE UTD
-        SET UTD.using_unit=LTRIM(RTRIM(REPLACE(UD.basedname, 'USING', '')))
-        FROM unit_tracking_data UTD
-        LEFT OUTER JOIN cad.dbo.undisp UD ON UTD.unitcode = UD.unitcode AND 
-          UD.basedname like '%USING%'";
-      try
-      {
-        using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.Tracking)))
-        {
-          db.Execute(query);
-        }
-      }
-      catch (Exception ex)
-      {
-        new ErrorLog(ex, query);
-      }
-    }
+    //public static void UpdateUnitsUsing()
+    //{
+    //  string query = @"
+    //    SET NOCOUNT ON;
+    //    UPDATE UTD
+    //    SET UTD.using_unit=LTRIM(RTRIM(REPLACE(UD.basedname, 'USING', '')))
+    //    FROM unit_tracking_data UTD
+    //    LEFT OUTER JOIN cad.dbo.undisp UD ON UTD.unitcode = UD.unitcode AND 
+    //      UD.basedname like '%USING%'";
+    //  try
+    //  {
+    //    using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.Tracking)))
+    //    {
+    //      db.Execute(query);
+    //    }
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    new ErrorLog(ex, query);
+    //  }
+    //}
   }
 }

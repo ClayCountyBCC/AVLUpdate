@@ -16,6 +16,36 @@ namespace AVLUpdate.Models.AirVantage
     public gateway gateway { get; set; }
     public List<string> labels { get; set; }
     public List<subscription> subscriptions { get; set; } = new List<subscription>();
+    public string unitcode
+    {
+      get
+      {
+        return (labels.Count() == 1) ? labels.First() : "";
+      }
+    }
+    public long imei
+    {
+      get
+      {
+        return gateway.imei.HasValue ? gateway.imei.Value : 0;
+      }
+    }
+    public long phone_number
+    {
+      get
+      {
+        if (subscriptions.Count() > 0)
+        {
+          var s = subscriptions.First();
+          return s.mobileNumber.HasValue ? s.mobileNumber.Value : 0;
+        }
+        else
+        {
+          return 0;
+        }
+
+      }
+    }
 
     public AirVantageData()
     {
