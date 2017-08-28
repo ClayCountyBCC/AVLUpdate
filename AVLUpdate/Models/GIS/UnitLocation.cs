@@ -99,9 +99,18 @@ namespace AVLUpdate.Models.GIS
           AS1.DeviceID IS NOT NULL 
         ORDER BY TimeStampUTC";
       // only return those locations we know are valid.
-      return (from u in Program.Get_Data<UnitLocation>(query, Program.CS_Type.GIS)
-              where u.Location.IsValid && u.deviceId > 0
-              select u).ToList();
+      try
+      {
+        return (from u in Program.Get_Data<UnitLocation>(query, Program.CS_Type.GIS)
+                where u.Location.IsValid && u.deviceId > 0
+                select u).ToList();
+      }
+      catch(Exception ex)
+      {
+        new ErrorLog(ex, query);
+        return null;
+      }
+
     }
 
   }

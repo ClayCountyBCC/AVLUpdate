@@ -6,7 +6,10 @@ namespace AVLUpdate.Models.Tracking
 {
   public class UnitTrackingControl
   {
-    private const int UnitUsingSecondsToWait = 30;
+    private const int GISMaxAgeInSeconds = 60;
+    private const int EmailFrequencyInSeconds = 60 * 5; // send an email every 5 minutes at most.
+    private DateTime NextEmail { get; set; } = DateTime.MinValue;
+    private const int UnitUsingSecondsToWait = 30;    
     private DateTime UnitUsingDataTimeOut { get; set; } = DateTime.MinValue;
     private bool UnitUsingDataIsExpired
     {
@@ -19,7 +22,8 @@ namespace AVLUpdate.Models.Tracking
     private DateTime DateLastUpdated { get; set; } = DateTime.MinValue;
 
     public UnitTrackingControl()
-    {      
+    {
+      
     }
 
     public void UpdateTrackingData()
@@ -27,9 +31,35 @@ namespace AVLUpdate.Models.Tracking
       utl = UnitTracking.Get();
     }
     
+    private void CheckNewestGISData(DateTime d)
+    {
+      // this function is going to use the max age from the UnitLocation data
+      // and check to see if it is within our expected window of time.  If it's
+      // too old, we'll send an email.
+      // We only want to send an error email if our max age difference is greater than GISMaxAgeInSeconds
+      // AND if we haven't sent an email in the Seconds since EmailFrequencyInSeconds and NextEmail variable
+      if(DateTime.Now.Subtract(d).Seconds > GISMaxAgeInSeconds)
+      {
+        if(NextEmail < DateTime.Now)
+        {
+          // we're going to send an email
+          ErrorLog.SaveEmail(Program.GISDataErrorEmailAddresses, "GIS Server - AVL Data not updating", $"Data was last updated: {d.ToLongDateString()}");
+          NextEmail = DateTime.Now.AddSeconds(EmailFrequencyInSeconds);
+        }
+      }
+      else
+      {
+        NextEmail = DateTime.MinValue;
+      }
+    }
+
     public void UpdateGISUnitLocations(List<GIS.UnitLocation> ull)
     {
-       foreach(GIS.UnitLocation ul in ull)
+      if (ull == null || ull.Count() == 0) return;
+      CheckNewestGISData((from u in ull
+                          select u.timestampLocal).Max());
+  
+      foreach (GIS.UnitLocation ul in ull)
       {
         var found = (from ut in utl
                      where ut.imei == ul.imei || ut.phoneNumber == ul.phoneNumber
@@ -41,10 +71,10 @@ namespace AVLUpdate.Models.Tracking
         }
         else
         {
-          if(count == 1)
+          if (count == 1)
           {
             UnitTracking u = found.First();
-            if(u.dateLastCommunicated < ul.timestampLocal) // don't update it if it's older than our current data.
+            if (u.dateLastCommunicated < ul.timestampLocal) // don't update it if it's older than our current data.
             {
               u.isChanged = true;
               u.dateLastCommunicated = ul.timestampLocal;
@@ -61,15 +91,13 @@ namespace AVLUpdate.Models.Tracking
           else // more than one row was found.
           {
             // if we hit this, we've found more than one unit with this unit's phone number/imei
-            // we're going to ignore this data and throw an error that we can follow up on.
+            // we're going to ignore this data and throw an error that we can follow up on manually.
             new ErrorLog("Too many Unit matches Found in AVL Data", ul.deviceId.ToString(), "", "", "");
           }
         }
       }
     }
-
     
-
     public void UpdateAirVantage(List<AirVantage.AirVantageData> avd)
     {
       if (avd == null || avd.Count() == 0) return;
@@ -102,7 +130,11 @@ namespace AVLUpdate.Models.Tracking
 
     public void UpdateFleetComplete(FleetComplete.FleetCompleteData fcd)
     {
-      if (fcd == null) return;
+      if (fcd == null || fcd.Data.Count() == 0) return;
+      foreach (FleetComplete.Asset d in fcd.Data)
+      {
+
+      }
     }
 
     public void Save()

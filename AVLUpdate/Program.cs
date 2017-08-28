@@ -21,6 +21,7 @@ namespace AVLUpdate
   class Program
   {
     public const int appId = 20010;
+    public const string GISDataErrorEmailAddresses = "Ann.Chaney@claycountygov.com; Daniel.McCartney@claycountygov.com;";
 
     static void Main()
     {
@@ -42,11 +43,13 @@ namespace AVLUpdate
         {
           // pull in the current state of the unit_tracking_data table 
           // this will also update the most recent unitUsing data.
-          utc.UpdateTrackingData(); 
-          
-          utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
-          
+          utc.UpdateTrackingData();
+
           utc.UpdateAirVantage(avl.Update()); // update the data from Airvantage every 5 minutes
+          // we update the AirVantage data before we update the GIS/AVL data because
+          // we might've updated a unit's imei / phone number in the mean time.
+
+          utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
 
           utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
 
