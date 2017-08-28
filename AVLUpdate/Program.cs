@@ -8,9 +8,10 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
 using AVLUpdate.Models;
-using AVLUpdate.Models.AirVantange;
+using AVLUpdate.Models.AirVantage;
 using AVLUpdate.Models.GIS;
 using AVLUpdate.Models.Tracking;
+using AVLUpdate.Models.FleetComplete;
 using System.Threading;
 using System.Net;
 using System.IO;
@@ -30,31 +31,26 @@ namespace AVLUpdate
       {
         endTime = DateTime.Today.AddDays(1).AddHours(5).AddMinutes(55);
       }
+      // init the base objects.      
       var avl = new AirVantageControl();
+      var utc = new UnitTrackingControl();
+      var fcc = new FleetCompleteControl();
 
       while (DateTime.Now < endTime) // we want this program to run from 6 AM to 5:55 AM
       {
         try
         {
-          // Goals
-          // update the data from Airvantage every 5 minutes
-          // update the data from GIS every 10 seconds
-          // update the data from FleetComplete every 30 seconds?
+          utc.UpdateTrackingData(); // pull in the current state of the unit_tracking_data table          
+          
+          utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
+          
+          utc.UpdateAirVantage(avl.Update()); // update the data from Airvantage every 5 minutes
 
+          utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
 
+          utc.Save();
 
-
-          //var avd = avl.Update();
-          //var nophone = (from a in avd
-          //               where !a.subscriptions.First().mobileNumber.HasValue
-          //               select a).ToList();
-          //var labels = (from a in avd
-          //              where a.labels.Count() > 1 || a.labels.Count() == 0
-          //              select a).ToList();
-          //var unitLocs = UnitLocation.Get();
-          var i = 0;
-
-          Thread.Sleep(10000);
+          Thread.Sleep(10000); // this may not be needed if we await/async these calls.
         }catch(Exception ex)
         {
           new ErrorLog(ex);

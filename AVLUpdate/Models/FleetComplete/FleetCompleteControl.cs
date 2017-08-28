@@ -15,5 +15,36 @@ namespace AVLUpdate.Models.FleetComplete
 
   public class FleetCompleteControl
   {
+    private const int SecondsToWait = 30;
+    private AccessToken Token { get; set; }
+    private DateTime DataTimeOut { get; set; } = DateTime.MinValue;
+    private bool IsExpired
+    {
+      get
+      {
+        return DataTimeOut < DateTime.Now;
+      }
+    }
+
+    public FleetCompleteControl()
+    {
+      Token = AccessToken.Authenticate();
+    }
+
+    public FleetCompleteData Update()
+    {
+      // we only query this again if the IsExpired field is true, otherwise
+      // we return an empty list.
+      // We return if we actually updated anything, this will be used
+      // to indicate that a refresh of the unit_tracking data is needed.
+      if (IsExpired)
+      {
+
+        var fcd = FleetCompleteData.Get(Token);
+        DataTimeOut = DateTime.Now.AddSeconds(SecondsToWait);
+        return fcd;
+      }
+      return null;
+    }
   }
 }

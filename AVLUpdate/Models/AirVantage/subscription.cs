@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace AVLUpdate.Models.AirVantange
+namespace AVLUpdate.Models.AirVantage
 {
   public class subscription
   {

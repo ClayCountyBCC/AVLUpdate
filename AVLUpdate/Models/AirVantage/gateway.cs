@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AVLUpdate.Models.AirVantange
+namespace AVLUpdate.Models.AirVantage
 {
   public class gateway
   {

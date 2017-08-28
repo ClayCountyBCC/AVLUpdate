@@ -3,29 +3,33 @@ using System.Collections.Generic;
 using Dapper;
 using System.Data;
 using System.Data.SqlClient;
-using AVLUpdate.Models.AirVantange;
+using AVLUpdate.Models.AirVantage;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AVLUpdate.Models.Tracking
 {
-  public class UnitTracking 
+  public class UnitTracking
   {
     // this matches what is in the unit_tracking_data
     // table in the Tracking database
+    // anytime we get a new location, in addition to saving it to the unit_tracking_data table, 
+    // we need to insert it into the tracking_data table.
     public string unitcode { get; set; } = "";
-    public string usingUnit { get; set; } = null;
+    public string usingUnit { get; set; } = null; // this is only updated by the UpdateUnitsUsing function
     public DateTime dateUpdated { get; set; } = DateTime.Now;
     public decimal longitude { get; set; } = 0;
     public decimal latitude { get; set; } = 0;
     public int direction { get; set; } = 0;
     public int velocityMPH { get; set; } = 0;
-    public int gpsSatelliteCount { get; set; } = 0;
     public string ipAddress { get; set; } = "";
+    public int gpsSatelliteCount { get; set; } = 0;
     public long imei { get; set; } = 0;
     public long phoneNumber { get; set; } = 0;
+    public string assetTag { get; set; } = "";
     public DateTime dateLastCommunicated { get; set; } = DateTime.Now;
+    public bool isChanged { get; set; } = false;
 
     public UnitTracking()
     {
@@ -81,6 +85,9 @@ namespace AVLUpdate.Models.Tracking
           UTD.velocity_mph velocityMPH,
           UTD.ip_address ipAddress,
           UTD.gps_satellite_count gpsSatelliteCount,
+          UTD.imei,
+          UTD.phone_number phoneNumber,
+          UTD.asset_tag assetTag,
           UTD.date_last_communicated dateLastCommunicated
         FROM unit_tracking_data UTD
         LEFT OUTER JOIN UsingUnit UU ON UTD.unitcode=UU.unit_using
@@ -110,8 +117,7 @@ namespace AVLUpdate.Models.Tracking
         WHEN MATCHED THEN
           
           UPDATE 
-          SET 
-            using_unit=@usingUnit,
+          SET             
             date_updated=@dateUpdated,
             date_last_communicated=@dateLastCommunicated,
             longitude=@longitude,
@@ -159,9 +165,28 @@ namespace AVLUpdate.Models.Tracking
       {
         new ErrorLog(ex, query);
       }
-
-
     }
 
+    public static void UpdateUnitsUsing()
+    {
+      string query = @"
+        SET NOCOUNT ON;
+        UPDATE UTD
+        SET UTD.using_unit=LTRIM(RTRIM(REPLACE(UD.basedname, 'USING', '')))
+        FROM unit_tracking_data UTD
+        LEFT OUTER JOIN cad.dbo.undisp UD ON UTD.unitcode = UD.unitcode AND 
+          UD.basedname like '%USING%'";
+      try
+      {
+        using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.Tracking)))
+        {
+          db.Execute(query);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+      }
+    }
   }
 }

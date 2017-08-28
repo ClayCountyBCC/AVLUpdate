@@ -89,6 +89,7 @@
     <Compile Include="Models\GIS\Point.cs" />
     <Compile Include="Models\GIS\UnitLocation.cs" />
     <Compile Include="Models\Tracking\UnitTracking.cs" />
+    <Compile Include="Models\Tracking\UnitTrackingControl.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

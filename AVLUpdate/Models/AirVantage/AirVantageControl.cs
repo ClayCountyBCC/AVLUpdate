@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using AVLUpdate.Models.Tracking;
 
-namespace AVLUpdate.Models.AirVantange
+namespace AVLUpdate.Models.AirVantage
 {
   public class AirVantageControl
   {
-    private const int MinutesToWait = 5;
+    private const int SecondsToWait = 5 * 60;
     private AccessToken Token { get; set; }
     private DateTime DataTimeOut { get; set; } = DateTime.MinValue;    
     private bool IsExpired
@@ -31,26 +31,25 @@ namespace AVLUpdate.Models.AirVantange
       Token = AccessToken.Authenticate();      
     }
 
-    private void Update()
+    public List<AirVantageData> Update()
     {
       // we only query this again if the IsExpired field is true, otherwise
       // we return an empty list.
+      // We return if we actually updated anything, this will be used
+      // to indicate that a refresh of the unit_tracking data is needed.
       if (IsExpired) 
       {
         if (Token.isExpired)
         {
           Token = AccessToken.Authenticate();
-          if (Token.isExpired) return;
+          if (Token.isExpired) return new List<AirVantageData>();
         }
 
         var avd = AirVantageData.Get(Token).ToList();
-        DataTimeOut = DateTime.Now.AddMinutes(MinutesToWait);
-        foreach (AirVantageData a in avd)
-        {
-          a.UpdateUnitTracking();
-        }
-        return;
-      }    
+        DataTimeOut = DateTime.Now.AddSeconds(SecondsToWait);
+        return avd;
+      }
+      return new List<AirVantageData>();
     }
 
   }
