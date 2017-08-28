@@ -69,12 +69,5 @@ namespace AVLUpdate.Models.AirVantage
       }
     }
 
-    public void UpdateUnitTracking()
-    {
-      // This function will take whatever is returned for this object and 
-      // update our UnitTracking table in the Tracking database.
-      UnitTracking.UpdateAirVantageData(this);
-    }
-
   }
 }

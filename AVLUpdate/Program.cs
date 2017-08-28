@@ -33,8 +33,8 @@ namespace AVLUpdate
         endTime = DateTime.Today.AddDays(1).AddHours(5).AddMinutes(55);
       }
       // init the base objects.      
-      var avl = new AirVantageControl();
-      var utc = new UnitTrackingControl();
+      var utc = new UnitTrackingControl();      
+      var avl = new AirVantageControl();      
       var fcc = new FleetCompleteControl();
 
       while (DateTime.Now < endTime) // we want this program to run from 6 AM to 5:55 AM
@@ -51,7 +51,7 @@ namespace AVLUpdate
 
           utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
 
-          utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
+          //utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
 
           utc.Save(); // Save the data to SQL
 

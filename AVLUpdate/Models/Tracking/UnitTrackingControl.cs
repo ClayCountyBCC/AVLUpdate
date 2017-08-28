@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.SqlClient;
+using System.Data;
+using Dapper;
 
 namespace AVLUpdate.Models.Tracking
 {
@@ -20,10 +23,37 @@ namespace AVLUpdate.Models.Tracking
     }
     private List<UnitTracking> utl { get; set; } = new List<UnitTracking>();
     private DateTime DateLastUpdated { get; set; } = DateTime.MinValue;
+    private DataTable dt { get; set; }
 
     public UnitTrackingControl()
     {
-      
+      dt = CreateDataTable();
+      // for testing, let's add some fake units.
+      utl.Add(new UnitTracking("AAA", 15, 1, "TEST"));
+      utl.Add(new UnitTracking("BBB", 24, 2, "TEST"));
+      utl.Add(new UnitTracking("CCC", 33, 3, "TEST"));
+      utl.Add(new UnitTracking("YYY", 52, 4, "TEST"));
+      utl.Add(new UnitTracking("ZZZ", 51, 5, "TEST"));
+    }
+
+    private DataTable CreateDataTable()
+    {
+      var dt = new DataTable("UnitTrackingData");
+      dt.Columns.Add("unitcode", typeof(string));
+      dt.Columns.Add("using_unit", typeof(string));
+      dt.Columns.Add("date_updated", typeof(DateTime));
+      dt.Columns.Add("longitude", typeof(double));
+      dt.Columns.Add("latitude", typeof(double));
+      dt.Columns.Add("direction", typeof(int));
+      dt.Columns.Add("velocity_mph", typeof(int));
+      dt.Columns.Add("ip_address", typeof(string));
+      dt.Columns.Add("gps_satellite_count", typeof(int));
+      dt.Columns.Add("data_source", typeof(string));
+      dt.Columns.Add("imei", typeof(long));
+      dt.Columns.Add("phone_number", typeof(long));
+      dt.Columns.Add("asset_tag", typeof(string));
+      dt.Columns.Add("date_last_communicated", typeof(DateTime));
+      return dt;
     }
 
     public void UpdateTrackingData()
@@ -141,7 +171,86 @@ namespace AVLUpdate.Models.Tracking
     {
       // this function will assume that the utl variable has been as updated as it's going to get
       // and now we'll save it to the unit_tracking_table.
+      dt.Rows.Clear();
+      foreach (UnitTracking u in utl)
+      {
+        dt.Rows.Add(u.unitcode, u.usingUnit, u.dateUpdated, u.longitude, u.latitude, u.direction, u.velocityMPH,
+          u.ipAddress, u.gpsSatelliteCount, u.dataSource, u.imei, u.phoneNumber, u.assetTag, u.dateLastCommunicated);
+      }
+
+      string query = @"
+        SET NOCOUNT, XACT_ABORT ON;
+
+        MERGE unit_tracking_data WITH (HOLDLOCK) AS UTD
+
+        USING @UnitTracking AS UT ON UTD.unitcode = UT.unitcode
+
+        WHEN MATCHED THEN
+          
+          UPDATE 
+          SET
+            using_unit=UT.using_unit,
+            date_updated=UT.date_updated,
+            date_last_communicated=UT.date_last_communicated,
+            longitude=UT.longitude,
+            latitude=UT.latitude,
+            direction=UT.direction,
+            velocity_mph=UT.velocity_mph,
+            gps_satellite_count=UT.gps_satellite_count,
+            ip_address=UT.ip_address,
+            data_source=UT.data_source,
+            imei=UT.imei,
+            phone_number=UT.phone_number,
+            asset_tag=UT.asset_tag
+
+        WHEN NOT MATCHED THEN
+
+          INSERT 
+            (unitcode
+            ,using_unit
+            ,longitude
+            ,latitude
+            ,direction
+            ,velocity_mph
+            ,ip_address
+            ,gps_satellite_count
+            ,data_source
+            ,imei
+            ,phone_number
+            ,asset_tag
+            ,date_updated
+            ,date_last_communicated)
+          VALUES (
+            UT.unitcode,
+            UT.using_unit,
+            UT.longitude,
+            UT.latitude,
+            UT.direction,
+            UT.velocity_mph,
+            UT.ip_address,
+            UT.gps_satellite_count,
+            UT.data_source,
+            UT.imei,
+            UT.phone_number,
+            UT.asset_tag,
+            UT.date_updated,
+            UT.date_last_communicated
+          );";
+      try
+      {
+        using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.Tracking)))
+        {
+          db.Execute(query, new { UnitTracking = dt.AsTableValuedParameter("UnitTrackingData") });
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+      }
+
     }
+
+    
 
   }
 }
