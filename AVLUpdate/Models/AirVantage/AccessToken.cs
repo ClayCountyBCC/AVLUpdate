@@ -47,13 +47,21 @@ namespace AVLUpdate.Models.AirVantage
       string clientsecret = Program.GetCS(Program.CS_Type.AV_Client_Secret);
       string url = $"https://na.airvantage.net/api/oauth/token?grant_type=password&username={user}&password={password}&client_id={clientid}&client_secret={clientsecret}";
       string json = Program.GetJSON(url);
-      if(json != null)
+      try
       {
-        return JsonConvert.DeserializeObject<AccessToken>(json);
-      }
-      else
+        if (json != null)
+        {
+          return JsonConvert.DeserializeObject<AccessToken>(json);
+        }
+        else
+        {
+          return null;
+        }
+
+      }catch(Exception ex)
       {
-        return new AccessToken();
+        new ErrorLog(ex, url);
+        return null;
       }
     }
 

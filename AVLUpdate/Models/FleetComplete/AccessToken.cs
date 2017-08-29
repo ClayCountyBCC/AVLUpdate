@@ -67,7 +67,7 @@ namespace AVLUpdate.Models.FleetComplete
       }
       else
       {
-        return new AccessToken();
+        return null;
       }
     }
   }

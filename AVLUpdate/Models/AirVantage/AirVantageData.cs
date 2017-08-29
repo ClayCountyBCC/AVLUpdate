@@ -46,7 +46,13 @@ namespace AVLUpdate.Models.AirVantage
 
       }
     }
-
+    public long phone_number_normalized
+    {
+      get
+      {
+        return phone_number > 9999999999 ? phone_number - 10000000000 : phone_number;
+      }
+    }
     public AirVantageData()
     {
 
@@ -55,16 +61,25 @@ namespace AVLUpdate.Models.AirVantage
     public static List<AirVantageData>Get(AccessToken token)
     {
       // let's catch an error if we fail at getting a token.
-      if (token == null) return null; 
+      if (token == null || token.access_token == null) return null; 
 
       string url = $"https://na.airvantage.net/api/v1/systems?fields=name,labels,uid,gateway,subscriptions&access_token={token.access_token}";
-      string json = Program.GetJSON(url);
-      if (json != null)
+      try
       {
-        return JObject.Parse(json).SelectToken("items").ToObject<List<AirVantageData>>();
-      }
-      else
+        string json = Program.GetJSON(url);
+
+        if (json != null)
+        {
+          return JObject.Parse(json).SelectToken("items").ToObject<List<AirVantageData>>();
+        }
+        else
+        {
+          return null;
+        }
+
+      }catch(Exception ex)
       {
+        new ErrorLog(ex, url);
         return null;
       }
     }

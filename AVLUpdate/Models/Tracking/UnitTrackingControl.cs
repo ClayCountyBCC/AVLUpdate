@@ -28,12 +28,6 @@ namespace AVLUpdate.Models.Tracking
     public UnitTrackingControl()
     {
       dt = CreateDataTable();
-      // for testing, let's add some fake units.
-      utl.Add(new UnitTracking("AAA", 15, 1, "TEST"));
-      utl.Add(new UnitTracking("BBB", 24, 2, "TEST"));
-      utl.Add(new UnitTracking("CCC", 33, 3, "TEST"));
-      utl.Add(new UnitTracking("YYY", 52, 4, "TEST"));
-      utl.Add(new UnitTracking("ZZZ", 51, 5, "TEST"));
     }
 
     private DataTable CreateDataTable()
@@ -88,11 +82,11 @@ namespace AVLUpdate.Models.Tracking
       if (ull == null || ull.Count() == 0) return;
       CheckNewestGISData((from u in ull
                           select u.timestampLocal).Max());
-  
+
       foreach (GIS.UnitLocation ul in ull)
       {
         var found = (from ut in utl
-                     where ut.imei == ul.imei || ut.phoneNumber == ul.phoneNumber
+                     where ut.imei == ul.deviceId || ut.phoneNumberNormalized == ul.deviceId
                      select ut);
         int count = found.Count();
         if (count == 0)
@@ -135,7 +129,7 @@ namespace AVLUpdate.Models.Tracking
       foreach (AirVantage.AirVantageData a in avd)
       {
         var ul = (from ut in utl
-                 where ut.unitcode == a.unitcode
+                 where ut.unitcode == a.unitcode.Trim()
                  select ut).ToList();
         if(ul.Count() > 0)
         {
@@ -145,15 +139,15 @@ namespace AVLUpdate.Models.Tracking
             u.imei = a.imei;
             u.isChanged = true;
           }
-          if(a.phone_number > 0 && a.phone_number != u.phoneNumber)
+          if(a.phone_number > 0 && a.phone_number_normalized != u.phoneNumberNormalized)
           {
-            u.phoneNumber = a.phone_number;
+            u.phoneNumber = a.phone_number_normalized;
             u.isChanged = true;
           }
         }
         else
         { // we didn't find the unit in our data, we should add it.
-          utl.Add(new UnitTracking(a.unitcode, a.imei, a.phone_number, "AV"));
+          utl.Add(new UnitTracking(a.unitcode.Trim(), a.imei, a.phone_number, "AV"));
         }
       }
     }
@@ -172,7 +166,11 @@ namespace AVLUpdate.Models.Tracking
       // this function will assume that the utl variable has been as updated as it's going to get
       // and now we'll save it to the unit_tracking_table.
       dt.Rows.Clear();
-      foreach (UnitTracking u in utl)
+      var changed = (from ut in utl
+                     where ut.isChanged || ut.usingUnit != null
+                     select ut).ToList(); // we only want to save the changed records.
+
+      foreach (UnitTracking u in changed)
       {
         dt.Rows.Add(u.unitcode, u.usingUnit, u.dateUpdated, u.longitude, u.latitude, u.direction, u.velocityMPH,
           u.ipAddress, u.gpsSatelliteCount, u.dataSource, u.imei, u.phoneNumber, u.assetTag, u.dateLastCommunicated);

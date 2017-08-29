@@ -15,6 +15,7 @@ using AVLUpdate.Models.FleetComplete;
 using System.Threading;
 using System.Net;
 using System.IO;
+using System.Net.Http;
 
 namespace AVLUpdate
 {
@@ -35,7 +36,7 @@ namespace AVLUpdate
       // init the base objects.      
       var utc = new UnitTrackingControl();      
       var avl = new AirVantageControl();      
-      var fcc = new FleetCompleteControl();
+      //var fcc = new FleetCompleteControl();
 
       while (DateTime.Now < endTime) // we want this program to run from 6 AM to 5:55 AM
       {
@@ -66,6 +67,7 @@ namespace AVLUpdate
     public static string GetJSON(string url, WebHeaderCollection hc = null)
     {
       var wr = HttpWebRequest.Create(url);
+      wr.Timeout = 20000;      
       wr.ContentType = "application/json";
       if(hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
       {
@@ -77,11 +79,13 @@ namespace AVLUpdate
       string json = "";
       try
       {
-        var response = wr.GetResponse();
-        using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+        using (var response = wr.GetResponse())
         {
-          json = sr.ReadToEnd();
-          return json;
+          using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+          {
+            json = sr.ReadToEnd();
+            return json;
+          }
         }
       }
       catch (Exception ex)

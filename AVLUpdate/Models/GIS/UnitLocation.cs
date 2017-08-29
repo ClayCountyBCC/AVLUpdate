@@ -58,6 +58,13 @@ namespace AVLUpdate.Models.GIS
     public int satelliteCount { get; set; } = 0;
     public long imei { get; set; } = 0;
     public long phoneNumber { get; set; } = 0;
+    public long phoneNumberNormalized
+    {
+      get
+      {
+        return phoneNumber > 9999999999 ? phoneNumber - 10000000000 : phoneNumber;
+      }
+    }
     public Point Location
     {
       get
@@ -101,9 +108,11 @@ namespace AVLUpdate.Models.GIS
       // only return those locations we know are valid.
       try
       {
-        return (from u in Program.Get_Data<UnitLocation>(query, Program.CS_Type.GIS)
-                where u.Location.IsValid && u.deviceId > 0
-                select u).ToList();
+        var data = Program.Get_Data<UnitLocation>(query, Program.CS_Type.GIS);
+        var valid = (from u in data
+                     where u.Location.IsValid && u.deviceId > 0
+                     select u).ToList();
+        return valid;
       }
       catch(Exception ex)
       {
