@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Dapper;
 using System.Data;
 using System.Data.SqlClient;
-using AVLUpdate.Models.AirVantage;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,13 +42,73 @@ namespace AVLUpdate.Models.Tracking
     {
 
     }
-    public UnitTracking(string Unitcode, long Imei, long PhoneNumber, string Source)
+    //public UnitTracking(string Unitcode, long Imei, long PhoneNumber, string Source)
+    //{
+    //  isChanged = true;
+    //  unitcode = Unitcode;
+    //  imei = Imei;
+    //  phoneNumber = PhoneNumber;
+    //  dataSource = Source;      
+    //}
+
+    public UnitTracking(AirVantage.AirVantageData a)
     {
-      unitcode = Unitcode;
-      imei = Imei;
-      phoneNumber = PhoneNumber;
-      dataSource = Source;
       isChanged = true;
+      unitcode = a.unitcode.Trim();
+      imei = a.imei;
+      phoneNumber = a.phone_number;
+      dataSource = "AV";
+    }
+
+    public UnitTracking(FleetComplete.Asset a)
+    {
+      isChanged = true;
+      unitcode = a.AssetTag;
+      assetTag = a.AssetTag;
+      dataSource = "FC";
+      dateLastCommunicated = a.LastUpdatedTimeStamp;
+      dateUpdated = a.LastUpdatedTimeStamp;
+      if(a.Position != null && a.Position.Latitude != 0)
+      {
+        latitude = a.Position.Latitude;
+        longitude = a.Position.Longitude;
+        direction = (int)a.Position.Direction;
+        velocityMPH = a.Position.Speed ?? 0;
+      }
+    }
+
+    public void UpdateFleetCompleteData(FleetComplete.Asset a)
+    {
+      if(dataSource == "AVL" && 
+        DateTime.Now.Subtract(dateLastCommunicated).TotalSeconds < 60)
+      {
+        // If we've had a location from the GIS system in the last 60 seconds,
+        // we should ignore this location because it's not as precise
+        // as our GIS location.
+        return; 
+      }
+      if (a.Position != null && a.Position.Latitude != 0)
+      {
+        latitude = a.Position.Latitude;
+        longitude = a.Position.Longitude;
+        direction = (int)a.Position.Direction;
+        velocityMPH = a.Position.Speed ?? 0;
+      }
+
+    }
+
+    public void UpdateAirVantageData(AirVantage.AirVantageData a)
+    {
+      if (a.imei > 0 && a.imei != imei)
+      {
+        imei = a.imei;
+        isChanged = true;
+      }
+      if (a.phone_number > 0 && a.phone_number_normalized != phoneNumberNormalized)
+      {
+        phoneNumber = a.phone_number_normalized;
+        isChanged = true;
+      }
     }
 
     public static List<UnitTracking> Get()

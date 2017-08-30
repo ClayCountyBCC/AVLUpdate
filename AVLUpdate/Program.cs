@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using System.Data;
@@ -12,7 +13,6 @@ using AVLUpdate.Models.AirVantage;
 using AVLUpdate.Models.GIS;
 using AVLUpdate.Models.Tracking;
 using AVLUpdate.Models.FleetComplete;
-using System.Threading;
 using System.Net;
 using System.IO;
 using System.Net.Http;
@@ -36,7 +36,7 @@ namespace AVLUpdate
       // init the base objects.      
       var utc = new UnitTrackingControl();      
       var avl = new AirVantageControl();      
-      //var fcc = new FleetCompleteControl();
+      var fcc = new FleetCompleteControl();
 
       while (DateTime.Now < endTime) // we want this program to run from 6 AM to 5:55 AM
       {
@@ -52,12 +52,13 @@ namespace AVLUpdate
 
           utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
 
-          //utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
+          utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
 
           utc.Save(); // Save the data to SQL
 
-          Thread.Sleep(10000); // this may not be needed if we await/async these calls.
-        }catch(Exception ex)
+          Thread.Sleep(8000); // this may not be needed if we await/async these calls.
+        }
+        catch (Exception ex)
         {
           new ErrorLog(ex);
         }

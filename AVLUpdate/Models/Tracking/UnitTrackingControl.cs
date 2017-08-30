@@ -133,21 +133,11 @@ namespace AVLUpdate.Models.Tracking
                  select ut).ToList();
         if(ul.Count() > 0)
         {
-          var u = ul.First();
-          if (a.imei > 0 && a.imei != u.imei)
-          {
-            u.imei = a.imei;
-            u.isChanged = true;
-          }
-          if(a.phone_number > 0 && a.phone_number_normalized != u.phoneNumberNormalized)
-          {
-            u.phoneNumber = a.phone_number_normalized;
-            u.isChanged = true;
-          }
+          ul.First().UpdateAirVantageData(a);
         }
         else
         { // we didn't find the unit in our data, we should add it.
-          utl.Add(new UnitTracking(a.unitcode.Trim(), a.imei, a.phone_number, "AV"));
+          utl.Add(new UnitTracking(a));
         }
       }
     }
@@ -157,6 +147,32 @@ namespace AVLUpdate.Models.Tracking
       if (fcd == null || fcd.Data.Count() == 0) return;
       foreach (FleetComplete.Asset d in fcd.Data)
       {
+        // we need to match this data based on our asset_tag field 
+        // we need to treat the asset_tag as a primary key, even though it really isn't
+        // in the unit_tracking_data table.
+        var ul = (from ut in utl
+                  where ut.assetTag == d.AssetTag
+                  select ut).ToList();
+        if(ul.Count() == 1)
+        {
+          // let's update that unit, barring a few conditions.
+
+        }
+        else
+        {
+          if(ul.Count() == 0)
+          {
+            // let's add this unit to the utl
+            utl.Add(new UnitTracking(d));
+          }
+          else
+          {
+            // if we hit this, we've found more than one unit with this unit's asset tag
+            // we're going to ignore this data and throw an error that we can follow up on manually.
+            new ErrorLog("Too many Asset Tag matches Found in Fleet Complete Data", d.AssetTag, "", "", "");
+          }
+        }
+
 
       }
     }

@@ -11,7 +11,7 @@ namespace AVLUpdate.Models.FleetComplete
   public class Asset
   {
     public string ID { get; set; }
-    public string Description { get; set; }
+    public string Description { get; set; } = "";
     public string DeviceID { get; set; }
     public int Status { get; set; }
     public bool IsCrashDetected { get; set; }
@@ -34,6 +34,13 @@ namespace AVLUpdate.Models.FleetComplete
     public Field WorkSchedule { get; set; }
     public Field Resource { get; set; }
     public Satellite Satellite { get; set; }
+    public string AssetTag
+    {
+      get
+      {
+        return Description;
+      }
+    }
 
     public Asset()
     {
