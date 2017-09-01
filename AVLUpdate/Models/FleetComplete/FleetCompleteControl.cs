@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,6 +39,10 @@ namespace AVLUpdate.Models.FleetComplete
       {
 
         var fcd = FleetCompleteData.Get(Token);
+        // let's remove the invalids
+        fcd.Data = (from d in fcd.Data
+                    where d.IsValid
+                    select d).ToList();
         DataTimeOut = DateTime.Now.AddSeconds(SecondsToWait);
         return fcd;
       }

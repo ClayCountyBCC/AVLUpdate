@@ -17,6 +17,14 @@ namespace AVLUpdate.Models.FleetComplete
     public bool IsCrashDetected { get; set; }
     public bool? IsSatellite { get; set; }
     public DateTime LastUpdatedTimeStamp { get; set; }
+    public DateTime LastUpdatedTimeStampLocal
+    {
+      get
+      {
+        return LastUpdatedTimeStamp.ToLocalTime();
+      }
+    }
+
     public bool IsVisible { get; set; }
     public string LicensePlate { get; set; }
     public string VIN { get; set; }
@@ -38,7 +46,16 @@ namespace AVLUpdate.Models.FleetComplete
     {
       get
       {
-        return Description;
+        return Description.Trim().ToUpper();
+      }
+    }
+    public bool IsValid
+    {
+      get
+      {
+        if (AssetTag.Length == 0) return false;
+        if (int.TryParse(AssetTag, out int n)) return false;
+        return (!(Position == null && Position.Latitude == 0));
       }
     }
 

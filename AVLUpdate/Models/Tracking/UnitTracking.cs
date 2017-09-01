@@ -42,14 +42,6 @@ namespace AVLUpdate.Models.Tracking
     {
 
     }
-    //public UnitTracking(string Unitcode, long Imei, long PhoneNumber, string Source)
-    //{
-    //  isChanged = true;
-    //  unitcode = Unitcode;
-    //  imei = Imei;
-    //  phoneNumber = PhoneNumber;
-    //  dataSource = Source;      
-    //}
 
     public UnitTracking(AirVantage.AirVantageData a)
     {
@@ -66,35 +58,42 @@ namespace AVLUpdate.Models.Tracking
       unitcode = a.AssetTag;
       assetTag = a.AssetTag;
       dataSource = "FC";
-      dateLastCommunicated = a.LastUpdatedTimeStamp;
-      dateUpdated = a.LastUpdatedTimeStamp;
-      if(a.Position != null && a.Position.Latitude != 0)
+      dateLastCommunicated = a.LastUpdatedTimeStampLocal;
+      dateUpdated = a.LastUpdatedTimeStampLocal;
+      try
       {
-        latitude = a.Position.Latitude;
-        longitude = a.Position.Longitude;
-        direction = (int)a.Position.Direction;
-        velocityMPH = a.Position.Speed ?? 0;
+        if (a.Position != null && a.Position.Latitude != 0)
+        {
+          latitude = a.Position.Latitude;
+          longitude = a.Position.Longitude;
+          direction = (int)a.Position.Direction;
+          velocityMPH = a.Position.Speed ?? 0;
+        }
+      }
+      catch(Exception ex)
+      {
+        new ErrorLog(ex, "Updating FleetComplete UnitTracking");
+        return;
       }
     }
 
     public void UpdateFleetCompleteData(FleetComplete.Asset a)
     {
-      if(dataSource == "AVL" && 
+      if (dataSource == "AVL" &&
         DateTime.Now.Subtract(dateLastCommunicated).TotalSeconds < 60)
       {
         // If we've had a location from the GIS system in the last 60 seconds,
         // we should ignore this location because it's not as precise
         // as our GIS location.
-        return; 
+        return;
       }
-      if (a.Position != null && a.Position.Latitude != 0)
-      {
-        latitude = a.Position.Latitude;
-        longitude = a.Position.Longitude;
-        direction = (int)a.Position.Direction;
-        velocityMPH = a.Position.Speed ?? 0;
-      }
-
+      isChanged = true;
+      dateLastCommunicated = a.LastUpdatedTimeStampLocal;
+      dateUpdated = a.LastUpdatedTimeStampLocal;
+      latitude = a.Position.Latitude;
+      longitude = a.Position.Longitude;
+      direction = (int)a.Position.Direction;
+      velocityMPH = a.Position.Speed ?? 0;
     }
 
     public void UpdateAirVantageData(AirVantage.AirVantageData a)

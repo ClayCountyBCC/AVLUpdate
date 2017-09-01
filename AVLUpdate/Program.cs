@@ -16,6 +16,7 @@ using AVLUpdate.Models.FleetComplete;
 using System.Net;
 using System.IO;
 using System.Net.Http;
+using System.Diagnostics;
 
 namespace AVLUpdate
 {
@@ -49,14 +50,12 @@ namespace AVLUpdate
           utc.UpdateAirVantage(avl.Update()); // update the data from Airvantage every 5 minutes
           // we update the AirVantage data before we update the GIS/AVL data because
           // we might've updated a unit's imei / phone number in the mean time.
-
           utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
 
           utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
 
           utc.Save(); // Save the data to SQL
-
-          Thread.Sleep(8000); // this may not be needed if we await/async these calls.
+          Thread.Sleep(7000); // this may not be needed if we await/async these calls.
         }
         catch (Exception ex)
         {
@@ -64,7 +63,6 @@ namespace AVLUpdate
         }
       }
    }
-
     public static string GetJSON(string url, WebHeaderCollection hc = null)
     {
       var wr = HttpWebRequest.Create(url);

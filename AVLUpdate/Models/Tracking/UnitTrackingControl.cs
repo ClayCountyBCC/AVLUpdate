@@ -4,6 +4,7 @@ using System.Linq;
 using System.Data.SqlClient;
 using System.Data;
 using Dapper;
+using System.Diagnostics;
 
 namespace AVLUpdate.Models.Tracking
 {
@@ -145,40 +146,43 @@ namespace AVLUpdate.Models.Tracking
     public void UpdateFleetComplete(FleetComplete.FleetCompleteData fcd)
     {
       if (fcd == null || fcd.Data.Count() == 0) return;
+
       foreach (FleetComplete.Asset d in fcd.Data)
       {
         // we need to match this data based on our asset_tag field 
         // we need to treat the asset_tag as a primary key, even though it really isn't
         // in the unit_tracking_data table.
-        var ul = (from ut in utl
-                  where ut.assetTag == d.AssetTag
-                  select ut).ToList();
-        if(ul.Count() == 1)
+        if(d.AssetTag.Length > 0)
         {
-          // let's update that unit, barring a few conditions.
-
-        }
-        else
-        {
-          if(ul.Count() == 0)
+          var ul = (from ut in utl
+                    where ut.assetTag == d.AssetTag
+                    select ut).ToList();
+          if (ul.Count() == 1)
           {
-            // let's add this unit to the utl
-            utl.Add(new UnitTracking(d));
+            // let's update that unit, barring a few conditions.
+            ul.First().UpdateFleetCompleteData(d);
           }
           else
           {
-            // if we hit this, we've found more than one unit with this unit's asset tag
-            // we're going to ignore this data and throw an error that we can follow up on manually.
-            new ErrorLog("Too many Asset Tag matches Found in Fleet Complete Data", d.AssetTag, "", "", "");
+            if (ul.Count() == 0)
+            {
+              // let's add this unit to the utl
+              utl.Add(new UnitTracking(d));
+            }
+            else
+            {
+              // if we hit this, we've found more than one unit with this unit's asset tag
+              // we're going to ignore this data and throw an error that we can follow up on manually.
+              new ErrorLog("Too many Asset Tag matches Found in Fleet Complete Data", d.AssetTag, "", "", "");
+            }
           }
         }
-
-
       }
     }
 
     public void Save()
     {
+
       // this function will assume that the utl variable has been as updated as it's going to get
       // and now we'll save it to the unit_tracking_table.
       dt.Rows.Clear();
@@ -235,7 +239,7 @@ namespace AVLUpdate.Models.Tracking
             ,date_updated
             ,date_last_communicated)
           VALUES (
-            UT.unitcode,
+            LTRIM(RTRIM(UT.unitcode)),
             UT.using_unit,
             UT.longitude,
             UT.latitude,
@@ -257,11 +261,11 @@ namespace AVLUpdate.Models.Tracking
           db.Execute(query, new { UnitTracking = dt.AsTableValuedParameter("UnitTrackingData") });
         }
       }
+
       catch (Exception ex)
       {
         new ErrorLog(ex, query);
       }
-
     }
 
     

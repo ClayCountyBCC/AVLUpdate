@@ -20,7 +20,7 @@ namespace AVLUpdate.Models.AirVantage
     {
       get
       {
-        return (labels.Count() == 1) ? labels.First() : "";
+        return (labels.Count() == 1) ? labels.First().Trim() : "";
       }
     }
     public long imei

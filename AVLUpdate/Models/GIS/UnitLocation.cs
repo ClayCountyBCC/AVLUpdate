@@ -109,6 +109,7 @@ namespace AVLUpdate.Models.GIS
       try
       {
         var data = Program.Get_Data<UnitLocation>(query, Program.CS_Type.GIS);
+        if (data == null) return null;
         var valid = (from u in data
                      where u.Location.IsValid && u.deviceId > 0
                      select u).ToList();
