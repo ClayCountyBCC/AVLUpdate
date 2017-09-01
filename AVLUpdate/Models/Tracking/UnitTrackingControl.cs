@@ -145,7 +145,7 @@ namespace AVLUpdate.Models.Tracking
 
     public void UpdateFleetComplete(FleetComplete.FleetCompleteData fcd)
     {
-      if (fcd == null || fcd.Data.Count() == 0) return;
+      if (fcd == null || fcd.Data == null || fcd.Data.Count() == 0) return;
 
       foreach (FleetComplete.Asset d in fcd.Data)
       {
