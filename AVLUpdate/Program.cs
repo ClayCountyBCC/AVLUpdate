@@ -20,12 +20,12 @@ using System.Diagnostics;
 
 namespace AVLUpdate
 {
-  class Program
+  public class Program
   {
     public const int appId = 20010;
     public const string GISDataErrorEmailAddresses = "Ann.Chaney@claycountygov.com; Daniel.McCartney@claycountygov.com;";
 
-    static void Main()
+    public static void Main()
     {
 
       // Main loop here
@@ -54,7 +54,8 @@ namespace AVLUpdate
 
           utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
 
-          utc.Save(); // Save the data to SQL
+          utc.Save(Program.CS_Type.Tracking); // Save the data to SQL
+          utc.Save(Program.CS_Type.GISTracking);
           Thread.Sleep(7000); // this may not be needed if we await/async these calls.
         }
         catch (Exception ex)
@@ -80,12 +81,16 @@ namespace AVLUpdate
       {
         using (var response = wr.GetResponse())
         {
-          using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+          if(response != null)
           {
-            json = sr.ReadToEnd();
-            return json;
+            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+            {
+              json = sr.ReadToEnd();
+              return json;
+            }
           }
         }
+        return null;
       }
       catch (Exception ex)
       {
@@ -171,7 +176,8 @@ namespace AVLUpdate
       AV_Client_Secret = 7,
       FC_User = 8,
       FC_Password = 9,
-      FC_Client_Id = 10
+      FC_Client_Id = 10,
+      GISTracking=11
     }
 
     public static string GetCS(CS_Type cs)

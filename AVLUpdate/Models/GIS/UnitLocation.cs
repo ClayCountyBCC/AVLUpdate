@@ -82,6 +82,7 @@ namespace AVLUpdate.Models.GIS
     {
       string query = @"
         USE ClayWebGIS;
+        SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
         SELECT 
           AS1.DeviceID deviceId, 
           AS1.DeviceType deviceType,

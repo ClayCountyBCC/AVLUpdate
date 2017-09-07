@@ -39,6 +39,7 @@ namespace AVLUpdate.Models.FleetComplete
       {
 
         var fcd = FleetCompleteData.Get(Token);
+        if (fcd == null || fcd.Data == null) return null;
         // let's remove the invalids
         fcd.Data = (from d in fcd.Data
                     where d.IsValid

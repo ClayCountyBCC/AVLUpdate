@@ -11,6 +11,7 @@ namespace AVLUpdate.Models.Tracking
   public class UnitTrackingControl
   {
     private const int GISMaxAgeInSeconds = 60;
+    private DateTime UnitLocationsLastUpdated = DateTime.MinValue;
     private const int EmailFrequencyInSeconds = 60 * 5; // send an email every 5 minutes at most.
     private DateTime NextEmail { get; set; } = DateTime.MinValue;
     private const int UnitUsingSecondsToWait = 30;    
@@ -80,7 +81,14 @@ namespace AVLUpdate.Models.Tracking
 
     public void UpdateGISUnitLocations(List<GIS.UnitLocation> ull)
     {
+      // Need to add a modification to this process that records when we successfully get data
+      // and then if that date is outside of our acceptable range, we send an email. 
+      // basically, it's an addendum to the CheckNewestGISData to account for the case
+      // where we don't get any data because the sql query doesn't return.
+
+      CheckNewestGISData(UnitLocationsLastUpdated);
       if (ull == null || ull.Count() == 0) return;
+      UnitLocationsLastUpdated = DateTime.Now;
       CheckNewestGISData((from u in ull
                           select u.timestampLocal).Max());
 
@@ -180,15 +188,16 @@ namespace AVLUpdate.Models.Tracking
       }
     }
 
-    public void Save()
+    public void Save(Program.CS_Type cs)
     {
 
       // this function will assume that the utl variable has been as updated as it's going to get
       // and now we'll save it to the unit_tracking_table.
       dt.Rows.Clear();
-      var changed = (from ut in utl
-                     where ut.isChanged || ut.usingUnit != null
-                     select ut).ToList(); // we only want to save the changed records.
+      var changed = new List<UnitTracking>();
+      changed = (from ut in utl
+                 where ut.isChanged || ut.usingUnit != null
+                 select ut).ToList(); // we only want to save the changed records.
 
       foreach (UnitTracking u in changed)
       {
@@ -196,10 +205,12 @@ namespace AVLUpdate.Models.Tracking
           u.ipAddress, u.gpsSatelliteCount, u.dataSource, u.imei, u.phoneNumber, u.assetTag, u.dateLastCommunicated);
       }
 
-      string query = @"
-        SET NOCOUNT, XACT_ABORT ON;
+      string query = @"        
 
-        MERGE unit_tracking_data WITH (HOLDLOCK) AS UTD
+        SET NOCOUNT, XACT_ABORT ON;
+        USE Tracking;
+
+        MERGE Tracking.dbo.unit_tracking_data WITH (HOLDLOCK) AS UTD
 
         USING @UnitTracking AS UT ON UTD.unitcode = UT.unitcode
 
@@ -256,7 +267,7 @@ namespace AVLUpdate.Models.Tracking
           );";
       try
       {
-        using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.Tracking)))
+        using (IDbConnection db = new SqlConnection(Program.GetCS(cs)))
         {
           db.Execute(query, new { UnitTracking = dt.AsTableValuedParameter("UnitTrackingData") });
         }
