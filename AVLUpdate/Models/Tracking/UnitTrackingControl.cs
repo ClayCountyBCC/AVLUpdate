@@ -135,6 +135,7 @@ namespace AVLUpdate.Models.Tracking
     {
       if (avd == null || avd.Count() == 0) return;
       // otherwise we're going to join our two lists and update what's different.
+
       foreach (AirVantage.AirVantageData a in avd)
       {
         var ul = (from ut in utl

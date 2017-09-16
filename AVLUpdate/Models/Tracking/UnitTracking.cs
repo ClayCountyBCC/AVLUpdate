@@ -120,11 +120,24 @@ namespace AVLUpdate.Models.Tracking
           FROM unit_tracking_data UTD 
           INNER JOIN cad.dbo.undisp UD ON UTD.unitcode = UD.unitcode AND 
             UD.basedname like '%USING%' 
+        ), UsingUnitCount(unitcode, total) AS (
+          SELECT 
+            LTRIM(RTRIM(REPLACE(ISNULL(UD.basedname, ''), 'USING', ''))) unitcode,
+            COUNT(*) Total
+          FROM unit_tracking_data UTD 
+          INNER JOIN cad.dbo.undisp UD ON UTD.unitcode = UD.unitcode AND 
+            UD.basedname like '%USING%' 
+          GROUP BY LTRIM(RTRIM(REPLACE(ISNULL(UD.basedname, ''), 'USING', '')))
+          HAVING COUNT(*) > 0
         )
 
         SELECT 
           UTD.unitcode,
-          UU.unitcode usingUnit,
+          CASE WHEN UUC.total > 1 
+          THEN 'ERROR' 
+          ELSE
+            UU.unitcode 
+          END usingUnit,
           UTD.date_updated dateUpdated,
           UTD.longitude,
           UTD.latitude,
@@ -139,6 +152,7 @@ namespace AVLUpdate.Models.Tracking
           UTD.date_last_communicated dateLastCommunicated
         FROM unit_tracking_data UTD
         LEFT OUTER JOIN UsingUnit UU ON UTD.unitcode=UU.unit_using
+        LEFT OUTER JOIN UsingUnitCount UUC ON UTD.unitcode = UUC.unitcode        
         ORDER BY unitcode ASC";
       try
       {
