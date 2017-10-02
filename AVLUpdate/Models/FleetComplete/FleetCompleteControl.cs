@@ -35,17 +35,24 @@ namespace AVLUpdate.Models.FleetComplete
       // we return an empty list.
       // We return if we actually updated anything, this will be used
       // to indicate that a refresh of the unit_tracking data is needed.
-      if (IsExpired)
+      try
       {
+        if (IsExpired)
+        {
 
-        var fcd = FleetCompleteData.Get(Token);
-        if (fcd == null || fcd.Data == null) return null;
-        // let's remove the invalids
-        fcd.Data = (from d in fcd.Data
-                    where d.IsValid
-                    select d).ToList();
-        DataTimeOut = DateTime.Now.AddSeconds(SecondsToWait);
-        return fcd;
+          var fcd = FleetCompleteData.Get(Token);
+          if (fcd == null || fcd.Data == null) return null;
+          // let's remove the invalids
+          fcd.Data = (from d in fcd.Data
+                      where d.IsValid
+                      select d).ToList();
+          DataTimeOut = DateTime.Now.AddSeconds(SecondsToWait);
+          return fcd;
+        }
+      }
+      catch(Exception ex)
+      {
+        new ErrorLog(ex);
       }
       return null;
     }

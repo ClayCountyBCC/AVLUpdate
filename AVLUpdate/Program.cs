@@ -55,7 +55,7 @@ namespace AVLUpdate
           utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
 
           utc.Save(Program.CS_Type.Tracking); // Save the data to SQL
-          utc.Save(Program.CS_Type.GISTracking);
+          //utc.Save(Program.CS_Type.GISTracking);
           Thread.Sleep(7000); // this may not be needed if we await/async these calls.
         }
         catch (Exception ex)

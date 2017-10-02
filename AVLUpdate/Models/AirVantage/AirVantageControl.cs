@@ -38,21 +38,29 @@ namespace AVLUpdate.Models.AirVantage
       // we return an empty list.
       // We return if we actually updated anything, this will be used
       // to indicate that a refresh of the unit_tracking data is needed.
-      var avlNew = new List<AirVantageData>();
-      if (IsExpired) 
+      try
       {
-        if (Token.isExpired)
+        var avlNew = new List<AirVantageData>();
+        if (IsExpired)
         {
-          Token = AccessToken.Authenticate();
-          if (Token.isExpired) return avlNew;
-        }
+          if (Token.isExpired)
+          {
+            Token = AccessToken.Authenticate();
+            if (Token.isExpired) return avlNew;
+          }
 
-        var avd = AirVantageData.Get(Token);
-        if (avd == null) return avlNew;
-        DataTimeOut = DateTime.Now.AddSeconds(SecondsToWait);
-        return avd.ToList(); ;
+          var avd = AirVantageData.Get(Token);
+          if (avd == null) return avlNew;
+          DataTimeOut = DateTime.Now.AddSeconds(SecondsToWait);
+          return avd.ToList(); ;
+        }
+        return avlNew;
       }
-      return avlNew;
+      catch(Exception ex)
+      {
+        new ErrorLog(ex);
+        return null;
+      }
     }
 
   }
