@@ -64,24 +64,29 @@ namespace AVLUpdate
         }
       }
    }
+
     public static string GetJSON(string url, WebHeaderCollection hc = null)
     {
+      ServicePointManager.ReusePort = true;
+      ServicePointManager.Expect100Continue = true;
+      ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
       var wr = HttpWebRequest.Create(url);
-      wr.Timeout = 20000;      
+      wr.Timeout = 40000;
+      wr.Proxy = null;
       wr.ContentType = "application/json";
-      if(hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
+      if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
       {
         foreach (string key in hc.AllKeys)
         {
           wr.Headers.Add(key, hc[key]);
-        }        
+        }
       }
       string json = "";
       try
       {
         using (var response = wr.GetResponse())
         {
-          if(response != null)
+          if (response != null)
           {
             using (StreamReader sr = new StreamReader(response.GetResponseStream()))
             {
@@ -94,7 +99,7 @@ namespace AVLUpdate
       }
       catch (Exception ex)
       {
-        new ErrorLog(ex, json);
+        new ErrorLog(ex, url + '\n' + json);
         return null;
       }
     }

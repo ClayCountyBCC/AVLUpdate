@@ -11,7 +11,7 @@ namespace AVLUpdate.Models.AirVantage
   public class AirVantageControl
   {
     private const int SecondsToWait = 5 * 60;
-    private AccessToken Token { get; set; } 
+    private AccessToken Token { get; set; } = null;
     private DateTime DataTimeOut { get; set; } = DateTime.MinValue;    
     private bool IsExpired
     {
@@ -43,7 +43,7 @@ namespace AVLUpdate.Models.AirVantage
         var avlNew = new List<AirVantageData>();
         if (IsExpired)
         {
-          if (Token.isExpired)
+          if (Token != null && Token.isExpired)
           {
             Token = AccessToken.Authenticate();
             if (Token.isExpired) return avlNew;

@@ -37,6 +37,10 @@ namespace AVLUpdate.Models.Tracking
     public string assetTag { get; set; } = "";
     public DateTime dateLastCommunicated { get; set; } = DateTime.Now;
     public bool isChanged { get; set; } = false;
+    public string inci_id { get; set; }
+    public string cadUnitStatus { get; set; }
+    public DateTime? cadUnitStatusTime { get; set; }
+
 
     public UnitTracking()
     {
@@ -48,7 +52,7 @@ namespace AVLUpdate.Models.Tracking
       isChanged = true;
       unitcode = a.unitcode.Trim();
       imei = a.imei;
-      phoneNumber = a.phone_number;
+      phoneNumber = a.phone_number_normalized;
       dataSource = "AV";
     }
 
@@ -149,8 +153,12 @@ namespace AVLUpdate.Models.Tracking
           UTD.imei,
           UTD.phone_number phoneNumber,
           UTD.asset_tag assetTag,
-          UTD.date_last_communicated dateLastCommunicated
+          UTD.date_last_communicated dateLastCommunicated,
+          CASE WHEN UD.inci_id = '' THEN NULL ELSE UD.inci_id END inci_id,
+          CASE WHEN UD.status = ''THEN NULL ELSE UD.status END cadUnitStatus,
+          UD.statustime cadUnitStatusTime
         FROM unit_tracking_data UTD
+        LEFT OUTER JOIN cad.dbo.undisp UD ON UTD.unitcode = UD.unitcode
         LEFT OUTER JOIN UsingUnit UU ON UTD.unitcode=UU.unit_using
         LEFT OUTER JOIN UsingUnitCount UUC ON UTD.unitcode = UUC.unitcode        
         ORDER BY unitcode ASC";

@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Data;
 using Dapper;
 using System.Diagnostics;
+using System.Device.Location;
 
 namespace AVLUpdate.Models.Tracking
 {
@@ -49,6 +50,12 @@ namespace AVLUpdate.Models.Tracking
       dt.Columns.Add("phone_number", typeof(long));
       dt.Columns.Add("asset_tag", typeof(string));
       dt.Columns.Add("date_last_communicated", typeof(DateTime));
+      dt.Columns.Add("inci_id", typeof(string));
+      dt.Columns.Add("unit_status", typeof(string));
+      var column = new DataColumn("unit_status_time", typeof(DateTime));
+      column.AllowDBNull = true;
+      dt.Columns.Add(column);
+      //dt.Columns.Add("unit_status_time", typeof(DateTime));
       return dt;
     }
 
@@ -92,8 +99,10 @@ namespace AVLUpdate.Models.Tracking
       CheckNewestGISData((from u in ull
                           select u.timestampLocal).Max());
 
+
       foreach (GIS.UnitLocation ul in ull)
       {
+
         var found = (from ut in utl
                      where ut.imei == ul.deviceId || ut.phoneNumberNormalized == ul.deviceId
                      select ut);
@@ -135,7 +144,6 @@ namespace AVLUpdate.Models.Tracking
     {
       if (avd == null || avd.Count() == 0) return;
       // otherwise we're going to join our two lists and update what's different.
-
       foreach (AirVantage.AirVantageData a in avd)
       {
         var ul = (from ut in utl
@@ -202,8 +210,10 @@ namespace AVLUpdate.Models.Tracking
 
       foreach (UnitTracking u in changed)
       {
-        dt.Rows.Add(u.unitcode, u.usingUnit, u.dateUpdated, u.longitude, u.latitude, u.direction, u.velocityMPH,
-          u.ipAddress, u.gpsSatelliteCount, u.dataSource, u.imei, u.phoneNumber, u.assetTag, u.dateLastCommunicated);
+        dt.Rows.Add(u.unitcode, u.usingUnit, u.dateUpdated, u.longitude, 
+          u.latitude, u.direction, u.velocityMPH, u.ipAddress, u.gpsSatelliteCount, 
+          u.dataSource, u.imei, u.phoneNumberNormalized, u.assetTag, 
+          u.dateLastCommunicated, u.inci_id, u.cadUnitStatus, u.cadUnitStatusTime);
       }
 
       string query = @"        
@@ -265,7 +275,42 @@ namespace AVLUpdate.Models.Tracking
             UT.asset_tag,
             UT.date_updated,
             UT.date_last_communicated
-          );";
+          );
+
+          INSERT INTO tracking_data (
+            ip_address
+            ,group_name
+            ,user_id
+            ,latitude
+            ,longitude
+            ,user_agent
+            ,user_date_captured
+            ,accuracy
+            ,altitude
+            ,altitude_accuracy
+            ,heading
+            ,speed
+            ,inci_id
+            ,unit_status
+            ,unit_status_time
+            )
+            SELECT
+              ip_address
+              ,unitcode
+              ,'AVL UPDATE'
+              ,latitude
+              ,longitude
+              ,data_source
+              ,date_last_communicated
+              ,CAST(gps_satellite_count AS float)
+              ,0
+              ,0
+              ,0
+              ,velocity_mph
+              ,inci_id
+              ,unit_status
+              ,unit_status_time
+            FROM @UnitTracking";
       try
       {
         using (IDbConnection db = new SqlConnection(Program.GetCS(cs)))
