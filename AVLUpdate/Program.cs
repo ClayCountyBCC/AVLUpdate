@@ -23,16 +23,16 @@ namespace AVLUpdate
   public class Program
   {
     public const int appId = 20010;
-    public const string GISDataErrorEmailAddresses = "Ann.Chaney@claycountygov.com; Daniel.McCartney@claycountygov.com;";
+    public const string GISDataErrorEmailAddresses = "Daniel.McCartney@claycountygov.com;";
 
     public static void Main()
     {
 
       // Main loop here
-      DateTime endTime = DateTime.Today.AddHours(5).AddMinutes(55);
-      if (DateTime.Now.Hour > 5)
+      DateTime endTime = DateTime.Today.AddHours(5);
+      if (DateTime.Now.Hour >= 5)
       {
-        endTime = DateTime.Today.AddDays(1).AddHours(5).AddMinutes(55);
+        endTime = DateTime.Today.AddDays(1).AddHours(5); // 5 am
       }
       // init the base objects.      
       var utc = new UnitTrackingControl();      
@@ -73,14 +73,15 @@ namespace AVLUpdate
       var wr = HttpWebRequest.Create(url);
       wr.Timeout = 40000;
       wr.Proxy = null;
-      wr.ContentType = "application/json";
+      wr.ContentType = "application/json";      
       if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
       {
         foreach (string key in hc.AllKeys)
         {
           wr.Headers.Add(key, hc[key]);
         }
-      }
+      }      
+
       string json = "";
       try
       {

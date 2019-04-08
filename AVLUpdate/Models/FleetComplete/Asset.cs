@@ -54,7 +54,7 @@ namespace AVLUpdate.Models.FleetComplete
       get
       {
         if (AssetTag.Length == 0) return false;
-        if (int.TryParse(AssetTag, out int n)) return false;
+        if (int.TryParse(AssetTag, out int n)) return false;        
         return (!(Position == null && Position.Latitude == 0));
       }
     }

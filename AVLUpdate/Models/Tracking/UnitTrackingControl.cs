@@ -102,7 +102,8 @@ namespace AVLUpdate.Models.Tracking
 
       foreach (GIS.UnitLocation ul in ull)
       {
-
+        var dateCheck = DateTime.Now.AddMinutes(5);
+        var now = DateTime.Now;
         var found = (from ut in utl
                      where ut.imei == ul.deviceId || ut.phoneNumberNormalized == ul.deviceId
                      select ut);
@@ -119,8 +120,8 @@ namespace AVLUpdate.Models.Tracking
             if (u.dateLastCommunicated < ul.timestampLocal) // don't update it if it's older than our current data.
             {
               u.isChanged = true;
-              u.dateLastCommunicated = ul.timestampLocal;
-              u.dateUpdated = ul.timestampLocal;
+              u.dateLastCommunicated = ul.timestampLocal > dateCheck ? now : ul.timestampLocal;
+              u.dateUpdated = ul.timestampLocal > dateCheck ? now : ul.timestampLocal;
               u.latitude = ul.Location.Latitude;
               u.longitude = ul.Location.Longitude;
               u.ipAddress = ul.ipAddress;
@@ -155,7 +156,7 @@ namespace AVLUpdate.Models.Tracking
         }
         else
         { // we didn't find the unit in our data, we should add it.
-          utl.Add(new UnitTracking(a));
+          if (a.unitcode.Length > 0) utl.Add(new UnitTracking(a));
         }
       }
     }
@@ -183,7 +184,7 @@ namespace AVLUpdate.Models.Tracking
           {
             if (ul.Count() == 0)
             {
-              // let's add this unit to the utl
+              // let's add this unit to the utl              
               utl.Add(new UnitTracking(d));
             }
             else

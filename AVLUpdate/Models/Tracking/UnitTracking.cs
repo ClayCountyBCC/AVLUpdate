@@ -83,21 +83,33 @@ namespace AVLUpdate.Models.Tracking
 
     public void UpdateFleetCompleteData(FleetComplete.Asset a)
     {
-      if (dataSource == "AVL" &&
-        DateTime.Now.Subtract(dateLastCommunicated).TotalSeconds < 60)
+      try
       {
-        // If we've had a location from the GIS system in the last 60 seconds,
-        // we should ignore this location because it's not as precise
-        // as our GIS location.
-        return;
+        if (dataSource == "AVL" &&
+          DateTime.Now.Subtract(dateLastCommunicated).TotalSeconds < 60)
+        {
+          // If we've had a location from the GIS system in the last 60 seconds,
+          // we should ignore this location because it's not as precise
+          // as our GIS location.
+          return;
+        }
+        if(a.Position.Longitude == 0 || a.Position.Latitude == 0)
+        {
+          // we didn't get a location for this unit so let's not do anything.
+          return;
+        }
+        isChanged = true;
+        dateLastCommunicated = a.LastUpdatedTimeStampLocal;
+        dateUpdated = a.LastUpdatedTimeStampLocal;
+        latitude = a.Position.Latitude;
+        longitude = a.Position.Longitude;
+        direction = (int)a.Position.Direction;
+        velocityMPH = a.Position.Speed ?? 0;
       }
-      isChanged = true;
-      dateLastCommunicated = a.LastUpdatedTimeStampLocal;
-      dateUpdated = a.LastUpdatedTimeStampLocal;
-      latitude = a.Position.Latitude;
-      longitude = a.Position.Longitude;
-      direction = (int)a.Position.Direction;
-      velocityMPH = a.Position.Speed ?? 0;
+      catch(Exception ex)
+      {
+        new ErrorLog(ex, "UpdateFleetCompleteData");
+      }
     }
 
     public void UpdateAirVantageData(AirVantage.AirVantageData a)
