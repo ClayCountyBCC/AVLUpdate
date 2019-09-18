@@ -100,11 +100,12 @@ namespace AVLUpdate.Models.GIS
             DeviceID
           FROM AVL_PS_CURRENT 
           WHERE 
-            DeviceID IS NOT NULL
+            DeviceID IS NOT NULL            
           GROUP BY DeviceID
         ) AS AVLGROUP ON AS1.OBJECTID=AVLGROUP.OBJECTID
         WHERE 
-          AS1.DeviceID IS NOT NULL 
+          AS1.DeviceID IS NOT NULL
+          AND DATEDIFF(hh, GETDATE(), AS1.TimeStampUTC) <= 5
         ORDER BY TimeStampUTC";
       // only return those locations we know are valid.
       try

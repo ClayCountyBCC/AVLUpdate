@@ -209,6 +209,8 @@ namespace AVLUpdate.Models.Tracking
                  where ut.isChanged || ut.usingUnit != null
                  select ut).ToList(); // we only want to save the changed records.
 
+      //var r23 = (from c in changed where c.unitcode == "R23" select c).ToList();
+
       foreach (UnitTracking u in changed)
       {
         dt.Rows.Add(u.unitcode, u.usingUnit, u.dateUpdated, u.longitude, 

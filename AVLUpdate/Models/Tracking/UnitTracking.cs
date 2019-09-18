@@ -129,27 +129,35 @@ namespace AVLUpdate.Models.Tracking
     public static List<UnitTracking> Get()
     {
       string query = @"
-        WITH UsingUnit(unitcode, unit_using) AS (
+        WITH UsingUnitCount AS (
+
           SELECT 
-            UTD.unitcode, 
-            LTRIM(RTRIM(REPLACE(ISNULL(UD.basedname, ''), 'USING', ''))) CurrentUnit 
-          FROM unit_tracking_data UTD 
-          INNER JOIN cad.dbo.undisp UD ON UTD.unitcode = UD.unitcode AND 
-            UD.basedname like '%USING%' 
-        ), UsingUnitCount(unitcode, total) AS (
-          SELECT 
-            LTRIM(RTRIM(REPLACE(ISNULL(UD.basedname, ''), 'USING', ''))) unitcode,
-            COUNT(*) Total
+            LTRIM(RTRIM(REPLACE(ISNULL(UD.basedname, ''), 'USING', ''))) unitcode
           FROM unit_tracking_data UTD 
           INNER JOIN cad.dbo.undisp UD ON UTD.unitcode = UD.unitcode AND 
             UD.basedname like '%USING%' 
           GROUP BY LTRIM(RTRIM(REPLACE(ISNULL(UD.basedname, ''), 'USING', '')))
-          HAVING COUNT(*) > 0
+          HAVING COUNT(*) > 1
+
+        
+        ),UsingUnit(unitcode, unit_using) AS (
+
+          SELECT 
+            UTD.unitcode, 
+            LTRIM(RTRIM(REPLACE(ISNULL(UD.basedname, ''), 'USING', ''))) CurrentUnit 
+          FROM unit_tracking_data UTD 
+          INNER JOIN cad.dbo.undisp UD ON UTD.unitcode = UD.unitcode 
+            AND UD.basedname like '%USING%' 
+          LEFT OUTER JOIN UsingUnitCount UC ON UC.unitcode = LTRIM(RTRIM(REPLACE(ISNULL(UD.basedname, ''), 'USING', '')))
+          WHERE
+            UC.unitcode IS NULL
+
         )
+       
 
         SELECT 
           UTD.unitcode,
-          CASE WHEN UUC.total > 1 
+          CASE WHEN UUC.unitcode IS NOT NULL 
           THEN 'ERROR' 
           ELSE
             UU.unitcode 

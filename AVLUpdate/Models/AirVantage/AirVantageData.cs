@@ -27,7 +27,17 @@ namespace AVLUpdate.Models.AirVantage
     {
       get
       {
-        return gateway.imei.HasValue ? gateway.imei.Value : 0;
+        if (gateway == null) return 0;
+        try
+        {
+          return gateway.imei.HasValue ? gateway.imei.Value : 0;
+        }
+        catch(Exception ex)
+        {
+          new ErrorLog(ex);
+          return 0;
+        }
+        
       }
     }
     public long phone_number

@@ -12,7 +12,7 @@ namespace AVLUpdate.Models.FleetComplete
   {
     public string ID { get; set; }
     public string Description { get; set; } = "";
-    public string DeviceID { get; set; }
+    public string DeviceID { get; set; } = "";
     public int Status { get; set; }
     public bool IsCrashDetected { get; set; }
     public bool? IsSatellite { get; set; }
@@ -27,10 +27,10 @@ namespace AVLUpdate.Models.FleetComplete
 
     public bool IsVisible { get; set; }
     public string LicensePlate { get; set; }
-    public string VIN { get; set; }
-    public string Make { get; set; }
-    public string Model { get; set; }
-    public int Year { get; set; }
+    public string VIN { get; set; } = "";
+    public string Make { get; set; } = "";
+    public string Model { get; set; } = "";
+    public int Year { get; set; } = -1;
     public string Manufacturer { get; set; }
     public bool HasMDT { get; set; }
     public bool AlternateDDSConfigured { get; set; }
