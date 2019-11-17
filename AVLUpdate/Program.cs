@@ -27,6 +27,10 @@ namespace AVLUpdate
 
     public static void Main()
     {
+      //var now = DateTime.Now.ToUniversalTime();
+      //var tickstart = DateTime.Parse("1/1/1970").ToUniversalTime();
+      //double i = now.Subtract(tickstart).TotalMilliseconds;
+
 
       // Main loop here
       DateTime endTime = DateTime.Today.AddHours(5);
@@ -65,7 +69,7 @@ namespace AVLUpdate
       }
    }
 
-    public static string GetJSON(string url, WebHeaderCollection hc = null)
+    public static string GetJSON(string url, WebHeaderCollection hc = null )
     {
       ServicePointManager.ReusePort = true;
       ServicePointManager.Expect100Continue = true;

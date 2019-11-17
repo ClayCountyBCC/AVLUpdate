@@ -18,29 +18,33 @@ namespace AVLUpdate.Models.FleetComplete
 
     }
 
-    public static FleetCompleteData Get(AccessToken token)
-    {
-      if (token == null) return null;
-
-      string url = $"https://{token.Domain}/v{token.APIVersion}/Integration/WebAPI/GPS/Asset?top=500";
-      string json = Program.GetJSON(url, token.Headers);
-      if (json != null)
-      {
-        try
-        {
-          return JsonConvert.DeserializeObject<FleetCompleteData>(json);
-        }
-        catch(Exception ex)
-        {
-          new ErrorLog(ex, json);
-          return null;
-        }
-      }
-      else
-      {
-        return null;
-      }
-    }
+    //public static FleetCompleteData Get(AccessToken token, ref string LastTimestamp)
+    //{
+    //  if (token == null) return null;
+      
+    //  string url = $"https://{token.Domain}/v{token.APIVersion}/Integration/WebAPI/GPS/Asset?top=500";
+    //  if (LastTimestamp.Length > 0)
+    //  {
+    //    url += "&filter=LastUpdatedTimeStamp gt " + LastTimestamp;
+    //  }
+    //    string json = Program.GetJSON(url, ref LastTimestamp, token.Headers);
+    //  if (json != null)
+    //  {
+    //    try
+    //    {
+    //      return JsonConvert.DeserializeObject<FleetCompleteData>(json);
+    //    }
+    //    catch(Exception ex)
+    //    {
+    //      new ErrorLog(ex, json);
+    //      return null;
+    //    }
+    //  }
+    //  else
+    //  {
+    //    return null;
+    //  }
+    //}
 
   }
 }
