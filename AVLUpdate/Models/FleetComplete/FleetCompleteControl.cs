@@ -80,9 +80,7 @@ namespace AVLUpdate.Models.FleetComplete
         return null;
       }
     }
-
-
-
+       
     public FleetCompleteData Update()
     {
       // we only query this again if the IsExpired field is true, otherwise

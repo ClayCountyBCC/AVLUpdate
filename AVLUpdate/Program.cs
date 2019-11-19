@@ -13,6 +13,7 @@ using AVLUpdate.Models.AirVantage;
 using AVLUpdate.Models.GIS;
 using AVLUpdate.Models.Tracking;
 using AVLUpdate.Models.FleetComplete;
+using AVLUpdate.Models.CAD;
 using System.Net;
 using System.IO;
 using System.Net.Http;
@@ -24,6 +25,8 @@ namespace AVLUpdate
   {
     public const int appId = 20010;
     public const string GISDataErrorEmailAddresses = "Daniel.McCartney@claycountygov.com;";
+    public int MaxAvlLogId { get; set; } = 0;
+    public DateTime NextCadLocationLookup = DateTime.MinValue;
 
     public static void Main()
     {
@@ -32,13 +35,14 @@ namespace AVLUpdate
       //double i = now.Subtract(tickstart).TotalMilliseconds;
 
 
-      // Main loop here
-      DateTime endTime = DateTime.Today.AddHours(5);
+      // Main loop here      
+      DateTime endTime = DateTime.Today.AddHours(5).AddMinutes(18);
       if (DateTime.Now.Hour >= 5)
       {
-        endTime = DateTime.Today.AddDays(1).AddHours(5); // 5 am
+        endTime = DateTime.Today.AddDays(1).AddHours(5).AddMinutes(18); // 5 am
       }
-      // init the base objects.      
+      // init the base objects.
+      var cad = new Program();
       var utc = new UnitTrackingControl();      
       var avl = new AirVantageControl();      
       var fcc = new FleetCompleteControl();
@@ -49,17 +53,31 @@ namespace AVLUpdate
         {
           // pull in the current state of the unit_tracking_data table 
           // this will also update the most recent unitUsing data.
-          utc.UpdateTrackingData();
+          //utc.UpdateTrackingData();
 
-          utc.UpdateAirVantage(avl.Update()); // update the data from Airvantage every 5 minutes
+          //utc.UpdateAirVantage(avl.Update()); // update the data from Airvantage every 5 minutes
           // we update the AirVantage data before we update the GIS/AVL data because
           // we might've updated a unit's imei / phone number in the mean time.
-          utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
+          var sw = new Stopwatch();
+          sw.Restart();
 
-          utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
+          UnitLocation.Get(); // get / save AVL data
 
-          utc.Save(Program.CS_Type.Tracking); // Save the data to SQL
-          //utc.Save(Program.CS_Type.GISTracking);
+          //utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
+
+          fcc.Update(); // get / save FC data
+
+          //utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
+
+          //utc.Save(Program.CS_Type.Tracking); // Save the data to SQL
+
+          cad.UpdateCadUnitLocations(); // get / save CAD data
+
+          utc.UpdateUnitLocations(); // update unit tracking
+
+          sw.Stop();
+          Console.WriteLine("seconds taken: " + sw.Elapsed.TotalSeconds.ToString());
+
           Thread.Sleep(7000); // this may not be needed if we await/async these calls.
         }
         catch (Exception ex)
@@ -68,6 +86,23 @@ namespace AVLUpdate
         }
       }
    }
+
+    public void UpdateCadUnitLocations()
+    {
+      if (NextCadLocationLookup > DateTime.Now) return;
+
+      NextCadLocationLookup = DateTime.Now.AddSeconds(30); // This may change, but for now, let's only look at this once every 30 seconds.
+
+      var data = CadUnitLocation.Get(MaxAvlLogId);
+
+      if (data.Count() == 0) return;
+
+      MaxAvlLogId = (from d in data
+                     select d.avllogid).Max();
+
+      CadUnitLocation.Save(data);
+
+    }
 
     public static string GetJSON(string url, WebHeaderCollection hc = null )
     {
@@ -194,7 +229,17 @@ namespace AVLUpdate
     {
       return ConfigurationManager.ConnectionStrings[cs.ToString()].ConnectionString;
     }
-#endregion
+    #endregion
+
+    public static decimal Truncate(decimal value, int decimals)
+    {
+      decimal factor = (decimal)Math.Pow(10, decimals);
+      decimal result = Math.Truncate(factor * value) / factor;
+      return result;
+    }
 
   }
+
+
+
 }

@@ -328,7 +328,21 @@ namespace AVLUpdate.Models.Tracking
       }
     }
 
-    
+    public void UpdateUnitLocations()
+    {
+      string sp = "Tracking.dbo.UpdateUnitLocations";
+      try
+      {
+        using (IDbConnection db = new SqlConnection(Program.GetCS(Program.CS_Type.Tracking)))
+        {
+          db.Execute(sp, commandType: CommandType.StoredProcedure);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, sp);        
+      }
+    }
 
   }
 }

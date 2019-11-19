@@ -78,6 +78,8 @@
     <Compile Include="Models\AirVantage\AirVantageData.cs" />
     <Compile Include="Models\AirVantage\gateway.cs" />
     <Compile Include="Models\AirVantage\subscription.cs" />
+    <Compile Include="Models\CAD\CadUnitLocation.cs" />
+    <Compile Include="Models\CAD\StatePlanePoint.cs" />
     <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\FleetComplete\AccessToken.cs" />
     <Compile Include="Models\FleetComplete\Advanced.cs" />
