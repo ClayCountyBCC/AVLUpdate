@@ -44,7 +44,7 @@ namespace AVLUpdate
       // init the base objects.
       var cad = new Program();
       var utc = new UnitTrackingControl();      
-      var avl = new AirVantageControl();      
+      //var avl = new AirVantageControl();      
       var fcc = new FleetCompleteControl();
 
       while (DateTime.Now < endTime) // we want this program to run from 6 AM to 5:55 AM
@@ -58,10 +58,8 @@ namespace AVLUpdate
           //utc.UpdateAirVantage(avl.Update()); // update the data from Airvantage every 5 minutes
           // we update the AirVantage data before we update the GIS/AVL data because
           // we might've updated a unit's imei / phone number in the mean time.
-          var sw = new Stopwatch();
-          sw.Restart();
 
-          UnitLocation.Get(); // get / save AVL data
+          UnitLocation.GetAndSave(); // get / save AVL data
 
           //utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
 
@@ -75,10 +73,7 @@ namespace AVLUpdate
 
           utc.UpdateUnitLocations(); // update unit tracking
 
-          sw.Stop();
-          Console.WriteLine("seconds taken: " + sw.Elapsed.TotalSeconds.ToString());
-
-          Thread.Sleep(7000); // this may not be needed if we await/async these calls.
+          Thread.Sleep(5000); // this may not be needed if we await/async these calls.
         }
         catch (Exception ex)
         {

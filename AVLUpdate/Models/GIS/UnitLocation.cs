@@ -81,7 +81,7 @@ namespace AVLUpdate.Models.GIS
 
     }
 
-    public static List<UnitLocation> Get()
+    public static void GetAndSave()
     {
       string query = @"
         USE ClayWebGIS;
@@ -114,18 +114,21 @@ namespace AVLUpdate.Models.GIS
       try
       {
         var data = Program.Get_Data<UnitLocation>(query, Program.CS_Type.GIS);
-        if (data == null) return null;
-        Save(data);
-        var valid = (from u in data
-                     where u.deviceId > 0 &&
-                     u.timestampLocal < DateTime.Now.AddMinutes(30)
-                     select u).ToList();        
-        return valid;
+
+        //if (data == null) return null;
+
+        Save(data); // Save the data
+
+        //var valid = (from u in data
+        //             where u.deviceId > 0 &&
+        //             u.timestampLocal < DateTime.Now.AddMinutes(30)
+        //             select u).ToList();        
+        //return valid;
       }
       catch(Exception ex)
       {
         new ErrorLog(ex, query);
-        return null;
+        //return null;
       }
     }
 
@@ -148,7 +151,7 @@ namespace AVLUpdate.Models.GIS
           d.Location.Latitude,
           d.Location.Longitude);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
           new ErrorLog(ex);
         }
@@ -213,13 +216,12 @@ namespace AVLUpdate.Models.GIS
         {
           db.Execute(query, new { AVLData = dt.AsTableValuedParameter("AVLData") });
         }
+
       }
       catch (Exception ex)
       {
         new ErrorLog(ex);
-        return;
       }
-      return;
     }
 
     private static DataTable CreateDataTable()
