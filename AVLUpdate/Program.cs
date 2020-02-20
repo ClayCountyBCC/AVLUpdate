@@ -25,7 +25,7 @@ namespace AVLUpdate
   {
     public const int appId = 20010;
     public const string GISDataErrorEmailAddresses = "Daniel.McCartney@claycountygov.com;";
-    public int MaxAvlLogId { get; set; } = 0;
+    //public int MaxAvlLogId { get; set; } = 0;
     public DateTime NextCadLocationLookup = DateTime.MinValue;
 
     public static void Main()
@@ -43,7 +43,7 @@ namespace AVLUpdate
       }
       // init the base objects.
       var cad = new Program();
-      var utc = new UnitTrackingControl();      
+      //var utc = new UnitTrackingControl();      
       //var avl = new AirVantageControl();      
       var fcc = new FleetCompleteControl();
 
@@ -71,7 +71,7 @@ namespace AVLUpdate
 
           cad.UpdateCadUnitLocations(); // get / save CAD data
 
-          utc.UpdateUnitLocations(); // update unit tracking
+          UnitTrackingControl.UpdateUnitLocations(); // update unit tracking
 
           Thread.Sleep(5000); // this may not be needed if we await/async these calls.
         }
@@ -88,12 +88,12 @@ namespace AVLUpdate
 
       NextCadLocationLookup = DateTime.Now.AddSeconds(30); // This may change, but for now, let's only look at this once every 30 seconds.
 
-      var data = CadUnitLocation.Get(MaxAvlLogId);
+      var data = CadUnitLocation.Get();
 
       if (data.Count() == 0) return;
 
-      MaxAvlLogId = (from d in data
-                     select d.avllogid).Max();
+      //MaxAvlLogId = (from d in data
+      //               select d.avllogid).Max();
 
       CadUnitLocation.Save(data);
 

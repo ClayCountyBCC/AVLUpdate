@@ -328,7 +328,7 @@ namespace AVLUpdate.Models.Tracking
       }
     }
 
-    public void UpdateUnitLocations()
+    public static void UpdateUnitLocations()
     {
       string sp = "Tracking.dbo.UpdateUnitLocations";
       try

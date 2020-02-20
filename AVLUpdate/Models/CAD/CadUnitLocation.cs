@@ -32,13 +32,15 @@ namespace AVLUpdate.Models.CAD
 
     public CadUnitLocation() { }
 
-    public static List<CadUnitLocation> Get(int previousMaxAvllogid)
+    public static List<CadUnitLocation> Get()
     {
-      var param = new DynamicParameters();
-      param.Add("@MaxAvlLogId", previousMaxAvllogid);
-
       string query = @"
-        SELECT 
+        DECLARE @MaxAvlLogId BIGINT = (SELECT
+             MAX(avllogid)
+           FROM
+             Tracking.dbo.cad_unit_location_data);
+
+        SELECT
           avllogid
           ,[unitcode]
           ,[timestamp] location_timestamp
@@ -49,9 +51,11 @@ namespace AVLUpdate.Models.CAD
           ,[geoy]
           ,[speed]
           ,[heading]
-        FROM [cad].[dbo].[vwMaxAvllogidByUnit]
-        WHERE avllogid > @MaxAvlLogId";
-      var data = Program.Get_Data<CadUnitLocation>(query, param, Program.CS_Type.Tracking);
+        FROM
+          [cad].[dbo].[vwMaxAvllogidByUnit]
+        WHERE
+          avllogid > @MaxAvlLogId";
+      var data = Program.Get_Data<CadUnitLocation>(query, Program.CS_Type.Tracking);
       return data;
     }
 
@@ -73,6 +77,7 @@ namespace AVLUpdate.Models.CAD
             ,d.Location.Longitude
             ,d.speed
             ,d.heading
+            ,d.avllogid
           );
         }
         catch (Exception ex)
@@ -105,6 +110,7 @@ namespace AVLUpdate.Models.CAD
             ,speed = CAD.speed
             ,heading = CAD.heading
             ,updated_on = @Now
+            ,avllogid=CAD.avllogid
 
         WHEN NOT MATCHED THEN
 
@@ -120,6 +126,7 @@ namespace AVLUpdate.Models.CAD
               ,speed
               ,heading
               ,updated_on
+              ,avllogid
             )
           VALUES (
               CAD.unitcode
@@ -132,6 +139,7 @@ namespace AVLUpdate.Models.CAD
               ,CAD.speed
               ,CAD.heading              
               ,@Now
+              ,CAD.avllogid
           );";
 
       try
@@ -161,6 +169,7 @@ namespace AVLUpdate.Models.CAD
       dt.Columns.Add("longitude", typeof(decimal));
       dt.Columns.Add("speed", typeof(decimal));
       dt.Columns.Add("heading", typeof(decimal));
+      dt.Columns.Add("avllogid", typeof(int));
       return dt;
     }
 
