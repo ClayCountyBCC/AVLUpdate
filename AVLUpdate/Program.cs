@@ -33,7 +33,9 @@ namespace AVLUpdate
       //var now = DateTime.Now.ToUniversalTime();
       //var tickstart = DateTime.Parse("1/1/1970").ToUniversalTime();
       //double i = now.Subtract(tickstart).TotalMilliseconds;
+      
 
+      DateTime NextCallLocationUpdateTime = DateTime.Now;
 
       // Main loop here      
       DateTime endTime = DateTime.Today.AddHours(5).AddMinutes(18);
@@ -58,6 +60,11 @@ namespace AVLUpdate
           //utc.UpdateAirVantage(avl.Update()); // update the data from Airvantage every 5 minutes
           // we update the AirVantage data before we update the GIS/AVL data because
           // we might've updated a unit's imei / phone number in the mean time.
+          if(DateTime.Now > NextCallLocationUpdateTime)
+          {
+            CadCallLocation.UpdateCallLocations();
+            NextCallLocationUpdateTime = DateTime.Now.AddHours(1);
+          }
 
           UnitLocation.GetAndSave(); // get / save AVL data
 
