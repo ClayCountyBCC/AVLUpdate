@@ -95,6 +95,7 @@
     <Compile Include="Models\FleetComplete\Satellite.cs" />
     <Compile Include="Models\GIS\Point.cs" />
     <Compile Include="Models\GIS\UnitLocation.cs" />
+    <Compile Include="Models\Notes.cs" />
     <Compile Include="Models\Tracking\UnitTracking.cs" />
     <Compile Include="Models\Tracking\UnitTrackingControl.cs" />
     <Compile Include="Program.cs" />
