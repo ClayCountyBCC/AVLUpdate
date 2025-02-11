@@ -26,14 +26,48 @@ namespace AVLUpdate.Models.CAD
     {
     }
 
-    public static void UpdateCallLocations()
+    public static void UpdateActiveCallLocations()
     {
-      var d = Get();
+      var d = GetActive();
       Save(d);
     }
 
+    public static void UpdateClosedCallLocations()
+    {
+      var d = GetClosed();
+      Save(d);
+    }
 
-    public static List<CadCallLocation> Get()
+    public static List<CadCallLocation> GetActive()
+    {
+      // This function will return any call locations that haven't been converted yet.
+      string query = @"
+WITH ValidIncidents AS (
+SELECT DISTINCT
+  L.inci_id
+FROM cad.dbo.log L
+INNER JOIN cad.dbo.incident I ON I.inci_id = L.inci_id AND I.inci_id != '' AND I.cancelled=0
+WHERE
+  L.transtype IN ('D','E','A')
+)
+
+SELECT
+  I.inci_id
+  ,geox
+  ,geoy
+FROM
+  cad.dbo.incident I
+  INNER JOIN ValidIncidents VI ON I.inci_id = VI.inci_id
+  LEFT OUTER JOIN Tracking.dbo.call_locations CL ON I.inci_id = CL.inci_id
+WHERE
+  CL.inci_id IS NULL
+  AND geoy > 0
+  AND geoy > 0";
+      var data = Program.Get_Data<CadCallLocation>(query, Program.CS_Type.Tracking);
+      return data;
+    }
+
+    public static List<CadCallLocation> GetClosed()
     {
       // This function will return any call locations that haven't been converted yet.
       string query = @"

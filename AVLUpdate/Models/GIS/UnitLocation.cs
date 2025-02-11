@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer;
+//using Microsoft.SqlServer.Types;
 using System.Linq;
 using System.Data;
 using Dapper;
@@ -84,7 +85,7 @@ namespace AVLUpdate.Models.GIS
     public static void GetAndSave()
     {
       string query = @"
-        USE ClayWebGIS;
+        USE Clay;
         SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
         SELECT 
           AS1.DeviceID deviceId, 

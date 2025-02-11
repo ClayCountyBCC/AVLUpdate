@@ -35,7 +35,7 @@ namespace AVLUpdate
       //double i = now.Subtract(tickstart).TotalMilliseconds;
       
 
-      DateTime NextCallLocationUpdateTime = DateTime.Now;
+      DateTime NextClosedCallLocationUpdateTime = DateTime.Now;
 
       // Main loop here      
       DateTime endTime = DateTime.Today.AddHours(5).AddMinutes(18);
@@ -47,7 +47,7 @@ namespace AVLUpdate
       var cad = new Program();
       //var utc = new UnitTrackingControl();      
       //var avl = new AirVantageControl();      
-      var fcc = new FleetCompleteControl();
+      //var fcc = new FleetCompleteControl();
 
       while (DateTime.Now < endTime) // we want this program to run from 6 AM to 5:55 AM
       {
@@ -60,17 +60,19 @@ namespace AVLUpdate
           //utc.UpdateAirVantage(avl.Update()); // update the data from Airvantage every 5 minutes
           // we update the AirVantage data before we update the GIS/AVL data because
           // we might've updated a unit's imei / phone number in the mean time.
-          if(DateTime.Now > NextCallLocationUpdateTime)
+          if(DateTime.Now > NextClosedCallLocationUpdateTime)
           {
-            CadCallLocation.UpdateCallLocations();
-            NextCallLocationUpdateTime = DateTime.Now.AddHours(1);
+            CadCallLocation.UpdateClosedCallLocations();
+            NextClosedCallLocationUpdateTime = DateTime.Now.AddHours(1);
           }
+          CadCallLocation.UpdateActiveCallLocations();
+            
 
           UnitLocation.GetAndSave(); // get / save AVL data
 
           //utc.UpdateGISUnitLocations(UnitLocation.Get());// update the data from GIS every 10 seconds
 
-          fcc.Update(); // get / save FC data
+          //fcc.Update(); // get / save FC data
 
           //utc.UpdateFleetComplete(fcc.Update()); // update the fleet complete data every 30 seconds.
 
